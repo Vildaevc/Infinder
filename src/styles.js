@@ -23,7 +23,7 @@ const styles = `
         #isf-main-button:active { cursor: grabbing; transform: scale(0.95); }
         #isf-main-button svg { width: 22px; height: 22px; opacity: 0.8; pointer-events: none; }
 
-        /* Окно */
+        /* Окно — анимация появления popIn */
         #isf-popup {
             position: fixed;
             width: 420px;
@@ -37,10 +37,13 @@ const styles = `
             z-index: ${config.zIndex};
             border: 1px solid rgba(0,0,0,0.08);
             overflow: hidden;
-            animation: isf-fadein 0.2s ease-out;
+            animation: isf-popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        @keyframes isf-fadein { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
+        @keyframes isf-popIn {
+            0%   { opacity: 0; transform: scale(0.95) translateY(8px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
 
         /* Заголовок */
         .isf-header {
@@ -57,9 +60,10 @@ const styles = `
             cursor: pointer; width: 28px; height: 28px;
             display: flex; align-items: center; justify-content: center;
             border-radius: 50%; background: #f5f5f5; color: #555;
-            font-size: 20px; transition: all 0.2s;
+            font-size: 20px;
+            transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
-        .isf-close:hover { background: #ffecec; color: #ff4444; }
+        .isf-close:hover { background: #ffecec; color: #ff4444; transform: rotate(90deg); }
 
         /* Меню */
         .isf-controls {
@@ -81,9 +85,9 @@ const styles = `
             border-radius: 8px;
             cursor: pointer;
             font-size: 13px; font-weight: 600; color: #555;
-            transition: all 0.2s;
+            transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
-        .isf-btn:hover { background: #f0f0f0; color: #000; }
+        .isf-btn:hover { background: #f0f0f0; color: #000; transform: translateY(-2px); }
         .isf-btn.isf-active {
             background: ${config.accentColor};
             color: #fff;
@@ -119,7 +123,7 @@ const styles = `
             overflow: hidden;
             position: relative;
             cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
+            transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             /* Шахматный фон */
             background-image: linear-gradient(45deg, #f0f0f0 25%, transparent 25%), linear-gradient(-45deg, #f0f0f0 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #f0f0f0 75%), linear-gradient(-45deg, transparent 75%, #f0f0f0 75%);
             background-size: 20px 20px;
@@ -143,7 +147,7 @@ const styles = `
             background: rgba(0,0,0,0.7); backdrop-filter: blur(2px);
             color: #fff; font-size: 10px; font-weight: 600;
             padding: 4px; text-align: center;
-            opacity: 0; transition: opacity 0.2s;
+            opacity: 0; transition: opacity 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
         .isf-grid-item:hover .isf-overlay { opacity: 1; }
 
@@ -156,9 +160,9 @@ const styles = `
             border-radius: 6px;
             cursor: pointer;
             display: flex; justify-content: space-between; align-items: center;
-            transition: background 0.1s;
+            transition: background 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94), border-color 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
-        .isf-list-item:hover { background: #f0f7ff; border-color: ${config.accentColor}; }
+        .isf-list-item:hover { background: #f0f7ff; border-color: ${config.accentColor}; transform: translateY(-2px); }
         .isf-item-name { font-size: 13px; color: #333; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 80%; }
         .isf-item-meta { font-size: 10px; color: #888; background: #eee; padding: 2px 6px; border-radius: 4px; }
 
@@ -177,7 +181,7 @@ const styles = `
             border-radius: 8px;
             cursor: pointer;
             box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            transition: transform 0.1s;
+            transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             position: relative;
             border: 1px solid rgba(0,0,0,0.1);
         }
@@ -185,7 +189,7 @@ const styles = `
         .isf-color-hex {
             position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%);
             font-size: 10px; background: #333; color: #fff; padding: 2px 4px; border-radius: 3px;
-            opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 10;
+            opacity: 0; pointer-events: none; transition: opacity 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94); z-index: 10;
         }
         .isf-color-item:hover .isf-color-hex { opacity: 1; bottom: -25px; }
 
@@ -203,15 +207,16 @@ const styles = `
             padding: 4px 8px; border-radius: 4px;
             background: rgba(0,122,255,0.1);
             display: none;
+            transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
-        .isf-dl-btn:hover { background: rgba(0,122,255,0.2); }
+        .isf-dl-btn:hover { background: rgba(0,122,255,0.2); transform: translateY(-2px); }
 
         /* Toast Notification */
         #isf-toast {
             position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
             background: rgba(0,0,0,0.8); color: #fff; padding: 8px 16px; border-radius: 20px;
             font-size: 13px; z-index: 2147483648; pointer-events: none;
-            opacity: 0; transition: opacity 0.3s;
+            opacity: 0; transition: opacity 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
     `;
 
