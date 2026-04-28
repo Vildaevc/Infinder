@@ -1,0 +1,18 @@
+{
+  "name": "infinder",
+  "version": "1.0.0",
+  "description": "Infinder v2.0 — поиск изображений, SVG, шрифтов, цветов и медиа",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "IdeaNova",
+  "license": "ISC",
+  "devDependencies": {
+    "vite": "^7.3.2",
+    "vite-plugin-monkey": "^7.1.9"
+  }
+}
