@@ -63,6 +63,21 @@ import { searchDispatcher } from './search/index.js';
         popup.style.display = "none";
     });
 
+    // Кнопка сворачивания/разворачивания (минимизация)
+    var minimizeBtn = document.getElementById("isf-minimize-btn");
+    var controlsGrid = document.querySelector(".isf-controls");
+    minimizeBtn.addEventListener("click", function () {
+        controlsGrid.classList.toggle("infinder-hidden");
+        // Меняем иконку: '-' (свернуть) <-> '+' (развернуть)
+        if (controlsGrid.classList.contains("infinder-hidden")) {
+            minimizeBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>';
+            minimizeBtn.title = "Развернуть";
+        } else {
+            minimizeBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>';
+            minimizeBtn.title = "Свернуть";
+        }
+    });
+
     // Навешиваем обработчики на кнопки категорий
     document.querySelectorAll(".isf-btn").forEach(function (e) {
         e.addEventListener("click", function (e) {

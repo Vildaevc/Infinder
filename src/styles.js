@@ -2,20 +2,49 @@
 import { config } from './config.js';
 
 const styles = `
-    /* Общие сбросы внутри виджета */
-    #isf-root * { box-sizing: border-box; outline: none; }
+    /* ===== ИЗОЛЯЦИЯ СТИЛЕЙ: сброс наследования CSS сайта-хоста ===== */
+    /* Сбрасываем наследуемые свойства, чтобы не ломать layout position:fixed */
+    #isf-root {
+        all: initial;
+        display: block;
+        font-family: sans-serif;
+        font-size: 14px;
+        line-height: 1.5;
+        color: #E2E8F0;
+        text-align: left;
+        letter-spacing: normal;
+        word-spacing: normal;
+        white-space: normal;
+        visibility: visible;
+        opacity: 1;
+        pointer-events: auto;
+    }
+    /* Принудительно перебиваем любые внешние стили через !important только на критичных свойствах */
+    #isf-root,
+    #isf-root * {
+        box-sizing: border-box !important;
+        font-family: sans-serif !important;
+    }
+
+    /* ===== КЛАСС СВОРАЧИВАНИЯ ===== */
+    .infinder-hidden {
+        display: none !important;
+    }
 
     /* Главная кнопка */
     #isf-main-button {
-        position: fixed;
-        width: ${config.btnSize}px; height: ${config.btnSize}px;
-        background: rgba(255, 255, 255, 0.9);
+        position: fixed !important;
+        width: ${config.btnSize}px !important;
+        height: ${config.btnSize}px !important;
+        background: rgba(255, 255, 255, 0.9) !important;
         backdrop-filter: blur(8px);
-        color: #1a1a2e;
-        border-radius: 35%;
+        color: #1a1a2e !important;
+        border-radius: 35% !important;
         cursor: grab;
-        display: flex; align-items: center; justify-content: center;
-        z-index: ${config.zIndex};
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        z-index: ${config.zIndex} !important;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.15);
         transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
         user-select: none;
@@ -29,20 +58,20 @@ const styles = `
 
     /* Окно — эффект стекла (Glassmorphism) */
     #isf-popup {
-        position: fixed;
-        width: 380px;
-        max-height: 80vh;
-        background: rgba(20, 20, 25, 0.7);
+        position: fixed !important;
+        width: 380px !important;
+        max-height: 80vh !important;
+        background: rgba(20, 20, 25, 0.7) !important;
         backdrop-filter: blur(12px);
         -webkit-backdrop-filter: blur(12px);
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        border-radius: 16px;
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 16px !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
         display: none;
-        flex-direction: column;
-        z-index: ${config.zIndex};
-        overflow: hidden;
+        flex-direction: column !important;
+        z-index: ${config.zIndex} !important;
+        overflow: hidden !important;
         animation: isf-popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
 
@@ -53,12 +82,15 @@ const styles = `
 
     /* Заголовок — чистый и минималистичный */
     .isf-header {
-        padding: 12px 16px;
-        background: transparent;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-        display: flex; justify-content: space-between; align-items: center;
-        cursor: grab; user-select: none;
-        min-height: 48px;
+        padding: 12px 16px !important;
+        background: transparent !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        cursor: grab;
+        user-select: none;
+        min-height: 48px !important;
     }
     .isf-header:active { cursor: grabbing; }
     .isf-title {
@@ -101,30 +133,32 @@ const styles = `
 
     /* Сетка кнопок парсеров (Grid) */
     .isf-controls {
-        padding: 12px 16px;
-        display: grid;
-        grid-template-columns: repeat(5, 1fr);
-        gap: 8px;
-        background: transparent;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        padding: 12px 16px !important;
+        display: grid !important;
+        grid-template-columns: repeat(5, 1fr) !important;
+        gap: 8px !important;
+        background: transparent !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
     }
 
     /* Кнопки-карточки */
     .isf-btn {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 6px;
-        padding: 12px 4px;
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.06);
-        border-radius: 8px;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 6px !important;
+        padding: 12px 4px !important;
+        background: rgba(255, 255, 255, 0.05) !important;
+        border: 1px solid rgba(255, 255, 255, 0.06) !important;
+        border-radius: 8px !important;
         cursor: pointer;
-        font-size: 11px; font-weight: 600; color: rgba(255, 255, 255, 0.6);
+        font-size: 11px !important;
+        font-weight: 600 !important;
+        color: rgba(255, 255, 255, 0.6) !important;
         transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
         user-select: none;
-        min-width: 0;
+        min-width: 0 !important;
     }
     .isf-btn:hover {
         background: rgba(255, 255, 255, 0.15);
@@ -159,15 +193,16 @@ const styles = `
 
     /* Контейнер результатов */
     #isf-results-container {
-        flex: 1;
-        overflow-y: auto;
-        padding: 12px;
-        display: flex; flex-wrap: wrap;
-        gap: 10px;
-        align-content: flex-start;
-        min-height: 120px;
-        max-height: 450px;
-        background: transparent;
+        flex: 1 !important;
+        overflow-y: auto !important;
+        padding: 12px !important;
+        display: flex !important;
+        flex-wrap: wrap !important;
+        gap: 10px !important;
+        align-content: flex-start !important;
+        min-height: 120px !important;
+        max-height: 450px !important;
+        background: transparent !important;
     }
     /* Кастомный скроллбар */
     #isf-results-container::-webkit-scrollbar { width: 4px; }
@@ -298,11 +333,14 @@ const styles = `
 
     /* Подвал */
     .isf-footer {
-        padding: 10px 16px;
-        background: transparent;
-        border-top: 1px solid rgba(255, 255, 255, 0.06);
-        font-size: 12px; color: rgba(255, 255, 255, 0.4);
-        display: flex; justify-content: space-between; align-items: center;
+        padding: 10px 16px !important;
+        background: transparent !important;
+        border-top: 1px solid rgba(255, 255, 255, 0.06) !important;
+        font-size: 12px !important;
+        color: rgba(255, 255, 255, 0.4) !important;
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
     }
     .isf-dl-btn {
         color: ${config.accentColor};
@@ -321,14 +359,22 @@ const styles = `
 
     /* Toast Notification */
     #isf-toast {
-        position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-        background: rgba(20, 20, 25, 0.85);
+        position: fixed !important;
+        bottom: 20px !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        background: rgba(20, 20, 25, 0.85) !important;
         backdrop-filter: blur(8px);
         -webkit-backdrop-filter: blur(8px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        color: #E2E8F0; padding: 8px 18px; border-radius: 20px;
-        font-size: 13px; z-index: 2147483648; pointer-events: none;
-        opacity: 0; transition: opacity 0.3s ease;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        color: #E2E8F0 !important;
+        padding: 8px 18px !important;
+        border-radius: 20px !important;
+        font-size: 13px !important;
+        z-index: 2147483648 !important;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.3s ease;
         box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
     }
 `;
