@@ -26,11 +26,6 @@ const styles = `
         font-family: sans-serif !important;
     }
 
-    /* ===== КЛАСС СВОРАЧИВАНИЯ ===== */
-    .infinder-hidden {
-        display: none !important;
-    }
-
     /* Главная кнопка */
     #isf-main-button {
         position: fixed !important;
@@ -139,6 +134,11 @@ const styles = `
         gap: 8px !important;
         background: transparent !important;
         border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+    }
+
+    /* ===== СВОРАЧИВАНИЕ: перебиваем display:grid !important через составной селектор ===== */
+    .isf-controls.infinder-hidden {
+        display: none !important;
     }
 
     /* Кнопки-карточки */
