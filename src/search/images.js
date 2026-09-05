@@ -2,6 +2,7 @@
 import { state } from '../state.js';
 import { resolveUrl, getFileName } from '../utils.js';
 import { downloadFile, createSaveAsButton } from '../download.js';
+import { scanPageElements } from '../scan.js';
 
 // Одновременно грузим не более BATCH кандидатов (не «вешаем» тяжёлые страницы)
 var BATCH = 16;
@@ -28,19 +29,33 @@ export async function searchImages() {
         }
     });
 
-    // Фоновые изображения
-    Array.from(document.querySelectorAll("*")).forEach(function (el) {
+    // Фоновые изображения: пошаговый обход (не блокирует UI на тяжёлых страницах),
+    // учитываются все url(...) в background-image, включая многослойные.
+    await scanPageElements(function (el) {
         var bg;
         try {
             bg = window.getComputedStyle(el).backgroundImage;
         } catch (ignore) {
             return;
         }
-        if (bg && bg.indexOf("url(") === 0) {
-            var m = bg.match(/url\((['"]?)(.*?)\1\)/);
-            if (m && m[2]) collect(m[2]);
+        if (!bg || "none" === bg) return;
+        var re = /url\((['"]?)(.*?)\1\)/g;
+        var m;
+        while ((m = re.exec(bg))) {
+            var raw = m[2].trim();
+            if (raw && "none" !== raw && raw.indexOf("data:") !== 0) collect(raw);
         }
     });
+
+    // Плитка-заглушка для изображения, которое не удалось загрузить.
+    // В foundUrls и счётчик не попадает (Скачать все не качает битые URL).
+    var addBrokenTile = function (url) {
+        var tile = document.createElement("div");
+        tile.className = "isf-grid-item isf-broken";
+        tile.title = "Не удалось загрузить: " + url;
+        tile.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="1" y1="1" x2="23" y2="23"/><path d="M10.41 2h3.18a2 2 0 0 1 1.42.59l1.4 1.4a2 2 0 0 0 1.41.59H21a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2.59a2 2 0 0 0 1.41-.59l1.4-1.4A2 2 0 0 1 9.59 2z"/></svg>';
+        resultsContainer.appendChild(tile);
+    };
 
     // Грузим каждый кандидат: плитка и foundUrls добавляются только
     // при успешной загрузке, поэтому «Найдено: N» == числу плиток,
@@ -83,7 +98,7 @@ export async function searchImages() {
                     added++;
                     resolve();
                 };
-                probe.onerror = function () { resolve(); };
+                probe.onerror = function () { addBrokenTile(url); resolve(); };
                 probe.src = url;
             });
         }));

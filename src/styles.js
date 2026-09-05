@@ -100,6 +100,25 @@ const styles = `
         100% { opacity: 1; transform: scale(1) translateY(0); }
     }
 
+    /* Спиннер поиска */
+    @keyframes isf-spin {
+        to { transform: rotate(360deg); }
+    }
+    #isf-root .isf-loading {
+        width: 100%;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        padding: 28px 0 !important;
+    }
+    #isf-root .isf-spinner {
+        width: 26px; height: 26px;
+        border-radius: 50%;
+        border: 3px solid rgba(255, 255, 255, 0.15);
+        border-top-color: ${config.accentColor};
+        animation: isf-spin 0.8s linear infinite;
+    }
+
     /* Заголовок — чистый и минималистичный */
     #isf-root .isf-header {
         padding: 12px 16px !important;
@@ -232,6 +251,13 @@ const styles = `
     #isf-root #isf-results-container::-webkit-scrollbar-track { background: transparent; }
 
     /* Пустое состояние */
+    #isf-root .isf-empty-msg {
+        width: 100%;
+        text-align: center;
+        color: #999;
+        margin-top: 20px !important;
+        font-size: 13px;
+    }
     #isf-root .isf-empty-state {
         width: 100%; height: 100%;
         display: flex; align-items: center; justify-content: center;
@@ -287,6 +313,28 @@ const styles = `
         opacity: 0; transition: opacity 0.2s ease;
     }
     #isf-root .isf-grid-item:hover .isf-overlay { opacity: 1; }
+
+    /* Битые/недоступные изображения — заглушка (без скачивания) */
+    #isf-root .isf-grid-item.isf-broken {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        cursor: default;
+        background-image: none;
+        background-color: rgba(0, 0, 0, 0.25) !important;
+        border-style: dashed !important;
+        border-color: rgba(255, 255, 255, 0.18) !important;
+    }
+    #isf-root .isf-grid-item.isf-broken:hover {
+        transform: none;
+        box-shadow: none;
+        border-color: rgba(255, 255, 255, 0.18) !important;
+    }
+    #isf-root .isf-grid-item.isf-broken svg {
+        width: 26px; height: 26px;
+        opacity: 0.35;
+        padding: 0;
+    }
 
     /* 2. Список (Fonts, Media) */
     #isf-root .isf-list-item {

@@ -1,55 +1,108 @@
 // Поиск цветов на странице
 import { GM_setClipboard } from '$';
+import { scanPageElements } from '../scan.js';
+
+// Нормализация цвета в #rrggbb (непрозрачный) или #rrggbbaa (с альфой).
+// hex разбирается напрямую; всё остальное (rgb/rgba/hsl/hsla/имена)
+// прогоняется через canvas — так надёжно обрабатываются любые форматы.
+
+var colorCache = new Map();
+var canvasCtx = canvasContext();
+
+function canvasContext() {
+    try { return document.createElement("canvas").getContext("2d", { willReadFrequently: true }); }
+    catch (e) { return null; }
+}
+
+function toHex(c) {
+    return Math.round(c).toString(16).padStart(2, "0");
+}
+
+function keyFromRgba(r, g, b, a) {
+    var key = "#" + toHex(r) + toHex(g) + toHex(b);
+    if (a < 0.995) key += toHex(a * 255); // сохраняем альфу (8-значный hex)
+    return key;
+}
+
+// Обработка произвольного CSS-цвета через canvas (hsl, named, ...).
+// Некорректное значение остаётся прозрачным -> null.
+function sampleByCanvas(ctx, value) {
+    if (!ctx) return null;
+    try {
+        ctx.fillStyle = "rgba(0, 0, 0, 0)";
+        ctx.fillStyle = value;
+        ctx.fillRect(0, 0, 1, 1);
+        var d = ctx.getImageData(0, 0, 1, 1).data;
+        if (d[3] === 0) return null;
+        return keyFromRgba(d[0], d[1], d[2], d[3] / 255);
+    } catch (e) {
+        return null;
+    }
+}
+
+function normalizeColor(value) {
+    if (!value) return null;
+    var s = value.trim().toLowerCase();
+    if (!s || "transparent" === s || "rgba(0, 0, 0, 0)" === s) return null;
+
+    if (colorCache.has(s)) return colorCache.get(s);
+
+    var key = null;
+    if (s.charAt(0) === "#") {
+        var hex = s.slice(1);
+        if (hex.length === 3 || hex.length === 4) {
+            hex = hex.split("").map(function (c) { return c + c; }).join("");
+        }
+        if (hex.length === 6 || hex.length === 8) {
+            key = "#" + hex;
+        } else {
+            key = sampleByCanvas(canvasCtx, s);
+        }
+    } else {
+        key = sampleByCanvas(canvasCtx, s);
+    }
+
+    colorCache.set(s, key);
+    return key;
+}
 
 export async function searchColors() {
     var resultsContainer = document.getElementById("isf-results-container");
     var toast = document.getElementById("isf-toast");
-    var e = {}, t = function (e) {
-        if (!e || "transparent" === e || "rgba(0, 0, 0, 0)" === e) return null;
-        if (e.startsWith("#")) return e;
-        var t = e.match(/\d+(\.\d+)?/g);
-        if (!t || t.length < 3 || (4 === t.length && 0 === parseFloat(t[3]))) return null;
-        var i = parseInt(t[0]).toString(16).padStart(2, "0");
-        var r = parseInt(t[1]).toString(16).padStart(2, "0");
-        var o = parseInt(t[2]).toString(16).padStart(2, "0");
-        return "#" + i + r + o;
-    };
+    var counts = {};
 
-    var i = document.querySelectorAll("*");
-    for (var r of i) {
-        var o = window.getComputedStyle(r);
-        [o.color, o.backgroundColor].forEach(function (i) {
-            var r = t(i);
-            if (r) {
-                e[r] = (e[r] || 0) + 1;
-            }
+    await scanPageElements(function (el) {
+        var computed = window.getComputedStyle(el);
+        [computed.color, computed.backgroundColor].forEach(function (value) {
+            var key = normalizeColor(value);
+            if (key) counts[key] = (counts[key] || 0) + 1;
         });
-    }
+    });
 
-    var n = Object.keys(e).sort(function (t, i) { return e[i] - e[t]; });
+    var sorted = Object.keys(counts).sort(function (a, b) { return counts[b] - counts[a]; });
 
-    n.forEach(function (e) {
-        var t = document.createElement("div");
-        t.className = "isf-color-item";
-        t.style.backgroundColor = e;
-        var hex = document.createElement("div");
-        hex.className = "isf-color-hex";
-        hex.textContent = e;
-        t.appendChild(hex);
-        t.onclick = function () {
-            var t;
+    sorted.forEach(function (key) {
+        var chip = document.createElement("div");
+        chip.className = "isf-color-item";
+        chip.style.backgroundColor = key;
+
+        var label = document.createElement("div");
+        label.className = "isf-color-hex";
+        label.textContent = key;
+        chip.appendChild(label);
+
+        chip.onclick = function () {
             if (typeof GM_setClipboard !== "undefined") {
-                GM_setClipboard(e);
+                GM_setClipboard(key);
             } else {
-                navigator.clipboard.writeText(e);
+                navigator.clipboard.writeText(key);
             }
-            t = "Скопировано: " + e;
-            toast.textContent = t;
+            toast.textContent = "Скопировано: " + key;
             toast.style.opacity = 1;
             setTimeout(function () { toast.style.opacity = 0; }, 2000);
         };
-        resultsContainer.appendChild(t);
+        resultsContainer.appendChild(chip);
     });
 
-    return n.length;
+    return sorted.length;
 }
