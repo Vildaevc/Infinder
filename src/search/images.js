@@ -45,7 +45,9 @@ export async function searchImages() {
     // Грузим каждый кандидат: плитка и foundUrls добавляются только
     // при успешной загрузке, поэтому «Найдено: N» == числу плиток,
     // а «Скачать все» не качает битые URL.
+    // Плитки вставляются по убыванию разрешения (W*H): самые крупные — первыми.
     var added = 0;
+    var loadedTiles = [];
     for (var start = 0; start < candidates.length; start += BATCH) {
         var batch = candidates.slice(start, start + BATCH);
         await Promise.all(batch.map(function (url) {
@@ -65,8 +67,19 @@ export async function searchImages() {
                     tile.appendChild(createSaveAsButton(function () {
                         downloadFile(url, getFileName(url), true);
                     }));
-                    resultsContainer.appendChild(tile);
                     state.foundUrls.add({ url: url, name: getFileName(url) });
+
+                    // Позиция по убыванию разрешения (сортировка вставками)
+                    var area = probe.naturalWidth * probe.naturalHeight;
+                    var index = loadedTiles.length;
+                    while (index > 0 && loadedTiles[index - 1].area < area) index--;
+                    if (index < loadedTiles.length) {
+                        resultsContainer.insertBefore(tile, loadedTiles[index].tile);
+                    } else {
+                        resultsContainer.appendChild(tile);
+                    }
+                    loadedTiles.splice(index, 0, { tile: tile, area: area });
+
                     added++;
                     resolve();
                 };
