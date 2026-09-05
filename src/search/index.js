@@ -1,4 +1,4 @@
-// Диспетчер поиска — функция g
+// Диспетчер поиска
 import { GM_download } from '$';
 import { state } from '../state.js';
 import { getFileName } from '../utils.js';
@@ -8,7 +8,7 @@ import { searchColors } from './colors.js';
 import { searchFonts } from './fonts.js';
 import { searchMedia } from './media.js';
 
-export async function searchDispatcher(e) {
+export async function searchDispatcher(action) {
     var resultsContainer = document.getElementById("isf-results-container");
     var statusEl = document.getElementById("isf-status");
     var dlAllBtn = document.getElementById("isf-dl-all");
@@ -19,47 +19,51 @@ export async function searchDispatcher(e) {
     statusEl.textContent = "Сканирование...";
     dlAllBtn.style.display = "none";
 
-    await new Promise(function (e) { setTimeout(e, 50); });
+    await new Promise(function (resolve) { setTimeout(resolve, 50); });
 
-    var i = 0;
+    var count = 0;
+    var failed = false;
+
     try {
-        if ("images" === e) i = await searchImages();
-        else if ("svg" === e) i = await searchSvg();
-        else if ("colors" === e) i = await searchColors();
-        else if ("fonts" === e) i = await searchFonts();
-        else if ("media" === e) i = await searchMedia();
+        if ("images" === action) count = await searchImages();
+        else if ("svg" === action) count = await searchSvg();
+        else if ("colors" === action) count = await searchColors();
+        else if ("fonts" === action) count = await searchFonts();
+        else if ("media" === action) count = await searchMedia();
 
-        statusEl.textContent = "Найдено: " + i;
+        statusEl.textContent = "Найдено: " + count;
 
-        if ("colors" !== e && i > 0) {
+        if ("colors" !== action && count > 0) {
             dlAllBtn.style.display = "block";
-            dlAllBtn.textContent = "Скачать все (" + i + ")";
+            dlAllBtn.textContent = "Скачать все (" + count + ")";
             dlAllBtn.onclick = function () {
-                (function e(i) {
-                    var r = Array.from(state.foundUrls);
-                    if (confirm("Скачать " + r.length + " файлов?")) {
-                        r.forEach(function (e, t) {
-                            setTimeout(function () {
-                                var t = e.url || e;
-                                var i = e.name || getFileName(t);
-                                if (typeof GM_download !== "undefined") {
-                                    GM_download({ url: t, name: i, saveAs: false });
-                                } else {
-                                    saveAs(t, i);
-                                }
-                            }, 500 * t);
-                        });
-                    }
-                })(e);
+                var files = Array.from(state.foundUrls);
+                if (!confirm("Скачать " + files.length + " файлов?")) return;
+                files.forEach(function (item, index) {
+                    setTimeout(function () {
+                        var url = item.url || item;
+                        var name = item.name || getFileName(url);
+                        if (typeof GM_download !== "undefined") {
+                            GM_download({ url: url, name: name, saveAs: false });
+                        } else {
+                            saveAs(url, name);
+                        }
+                    }, 500 * index);
+                });
             };
         }
-    } catch (r) {
-        console.error(r);
+    } catch (err) {
+        failed = true;
+        console.error(err);
         statusEl.textContent = "Ошибка поиска";
+        dlAllBtn.style.display = "none";
     } finally {
         state.isSearching = false;
-        if (0 === i) {
-            resultsContainer.innerHTML = '<div style="width:100%;text-align:center;color:#999;margin-top:20px;">Ничего не найдено</div>';
-        }
+    }
+
+    // Пустое состояние показываем только в успешной ветке,
+    // чтобы не затирать «Ошибка поиска».
+    if (!failed && 0 === count) {
+        resultsContainer.innerHTML = '<div style="width:100%;text-align:center;color:#999;margin-top:20px;">Ничего не найдено</div>';
     }
 }

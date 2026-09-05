@@ -16,7 +16,12 @@ import { searchDispatcher } from './search/index.js';
     var popup = elements.popup;
 
     // Восстанавливаем позицию кнопки из localStorage
-    var savedPos = JSON.parse(localStorage.getItem("isf_pos_v3")) || { right: 20, bottom: 20 };
+    // (защита: localStorage может быть недоступен, значение — повреждено)
+    var savedPos = { right: 20, bottom: 20 };
+    try {
+        var storedPos = JSON.parse(localStorage.getItem("isf_pos_v3"));
+        if (storedPos && "object" === typeof storedPos) savedPos = storedPos;
+    } catch (ignore) { /* фолбэк на позицию по умолчанию */ }
 
     if (typeof savedPos.left !== "undefined") {
         button.style.left = savedPos.left + "px";
@@ -33,11 +38,13 @@ import { searchDispatcher } from './search/index.js';
         button.style.top = "auto";
     }
 
-    // Функция центрирования попапа
+    // Функция центрирования попапа (по фактическим размерам, без magic-чисел)
     var centerPopup = function () {
-        popup.getBoundingClientRect();
-        popup.style.left = window.innerWidth / 2 - 210 + "px";
-        popup.style.top = window.innerHeight / 2 - 250 + "px";
+        var rect = popup.getBoundingClientRect();
+        var left = Math.max(0, Math.round((window.innerWidth - rect.width) / 2));
+        var top = Math.max(0, Math.round((window.innerHeight - rect.height) / 2));
+        popup.style.left = left + "px";
+        popup.style.top = top + "px";
     };
 
     // Активируем drag для кнопки и попапа
@@ -78,14 +85,16 @@ import { searchDispatcher } from './search/index.js';
         }
     });
 
-    // Навешиваем обработчики на кнопки категорий
-    document.querySelectorAll(".isf-btn").forEach(function (e) {
-        e.addEventListener("click", function (e) {
-            document.querySelectorAll(".isf-btn").forEach(function (e) {
-                e.classList.remove("isf-active");
+    // Навешиваем обработчики на кнопки категорий.
+    // currentTarget — сама кнопка, даже если клик пришёлся по иконке/подписи.
+    document.querySelectorAll(".isf-btn").forEach(function (btn) {
+        btn.addEventListener("click", function (evt) {
+            document.querySelectorAll(".isf-btn").forEach(function (other) {
+                other.classList.remove("isf-active");
             });
-            e.target.classList.add("isf-active");
-            searchDispatcher(e.target.dataset.action);
+            var clicked = evt.currentTarget;
+            clicked.classList.add("isf-active");
+            searchDispatcher(clicked.dataset.action);
         });
     });
 

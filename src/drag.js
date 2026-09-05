@@ -21,7 +21,9 @@ export function makeDraggable(e, t) {
         e.style.cursor = "";
         if (i) {
             if ("isf-main-button" === e.id) {
-                localStorage.setItem("isf_pos_v3", JSON.stringify({ left: parseInt(e.style.left), top: parseInt(e.style.top) }));
+                try {
+                    localStorage.setItem("isf_pos_v3", JSON.stringify({ left: parseInt(e.style.left), top: parseInt(e.style.top) }));
+                } catch (err) { /* localStorage недоступен — позиция не сохранится, это не критично */ }
             }
             setTimeout(function () { i = false; }, 50);
         }

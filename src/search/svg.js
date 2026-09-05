@@ -34,7 +34,10 @@ export async function searchSvg() {
     document.querySelectorAll("svg").forEach(function (e, t) {
         var o = e.getBoundingClientRect();
         if (o.width > 0 && o.height > 0) {
-            var n = e.innerHTML.length;
+            // Ключ уникальности — полная сериализация, а не длина строки:
+            // разные SVG с одинаковой длиной не отбрасываются,
+            // одинаковые (повторяющиеся иконки) — схлопываются корректно.
+            var n = new XMLSerializer().serializeToString(e);
             if (!i.has(n)) {
                 i.add(n);
                 r(e, false, "vector_" + t + ".svg");
