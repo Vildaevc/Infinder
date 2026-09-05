@@ -1,6 +1,7 @@
 // Поиск шрифтов на странице
 import { state } from '../state.js';
 import { resolveUrl, getFileName } from '../utils.js';
+import { downloadFile } from '../download.js';
 
 export async function searchFonts() {
     var resultsContainer = document.getElementById("isf-results-container");
@@ -20,7 +21,7 @@ export async function searchFonts() {
                         var c = resolveUrl(d[1]);
                         if (c && !c.startsWith("data:") && !e.has(c)) {
                             e.add(c);
-                            state.foundUrls.add(c);
+                            state.foundUrls.add({ url: c, name: getFileName(c) });
                             i++;
                             var p = document.createElement("div");
                             p.className = "isf-list-item";
@@ -35,7 +36,7 @@ export async function searchFonts() {
                                         </div>
                                     </div>
                                 `;
-                            p.onclick = function () { saveAs(c, getFileName(c)); };
+                            p.onclick = function () { downloadFile(c, getFileName(c)); };
                             resultsContainer.appendChild(p);
                         }
                     }

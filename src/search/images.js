@@ -1,7 +1,7 @@
 // Поиск изображений на странице
-import { GM_download } from '$';
 import { state } from '../state.js';
 import { resolveUrl, getFileName } from '../utils.js';
+import { downloadFile } from '../download.js';
 
 // Одновременно грузим не более BATCH кандидатов (не «вешаем» тяжёлые страницы)
 var BATCH = 16;
@@ -60,15 +60,9 @@ export async function searchImages() {
                     overlay.className = "isf-overlay";
                     overlay.textContent = probe.naturalWidth + "x" + probe.naturalHeight;
                     tile.appendChild(overlay);
-                    tile.onclick = function () {
-                        if (typeof GM_download !== "undefined") {
-                            GM_download({ url: url, name: getFileName(url) });
-                        } else {
-                            saveAs(url, getFileName(url));
-                        }
-                    };
+                    tile.onclick = function () { downloadFile(url, getFileName(url)); };
                     resultsContainer.appendChild(tile);
-                    state.foundUrls.add(url);
+                    state.foundUrls.add({ url: url, name: getFileName(url) });
                     added++;
                     resolve();
                 };

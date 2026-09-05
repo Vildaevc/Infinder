@@ -11,7 +11,7 @@ export async function searchMedia() {
         var n = resolveUrl(r);
         if (!n || e.has(n)) return;
         e.add(n);
-        state.foundUrls.add(n);
+        state.foundUrls.add({ url: n, name: getFileName(n) });
         i++;
         var s = document.createElement("div");
         s.className = "isf-list-item";

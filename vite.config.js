@@ -18,9 +18,6 @@ export default defineConfig({
                     'GM_setClipboard'
                 ],
                 noframes: true,
-                require: [
-                    'https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js'
-                ],
                 'run-at': 'document-end'
             }
         })

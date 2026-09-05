@@ -1,7 +1,6 @@
 // Диспетчер поиска
-import { GM_download } from '$';
 import { state } from '../state.js';
-import { getFileName } from '../utils.js';
+import { downloadFile } from '../download.js';
 import { searchImages } from './images.js';
 import { searchSvg } from './svg.js';
 import { searchColors } from './colors.js';
@@ -37,17 +36,13 @@ export async function searchDispatcher(action) {
             dlAllBtn.style.display = "block";
             dlAllBtn.textContent = "Скачать все (" + count + ")";
             dlAllBtn.onclick = function () {
+                // Все записи foundUrls — {url, name} (единый формат, Фаза 2.2)
                 var files = Array.from(state.foundUrls);
+                if (!files.length) return;
                 if (!confirm("Скачать " + files.length + " файлов?")) return;
                 files.forEach(function (item, index) {
                     setTimeout(function () {
-                        var url = item.url || item;
-                        var name = item.name || getFileName(url);
-                        if (typeof GM_download !== "undefined") {
-                            GM_download({ url: url, name: name, saveAs: false });
-                        } else {
-                            saveAs(url, name);
-                        }
+                        downloadFile(item.url, item.name);
                     }, 500 * index);
                 });
             };

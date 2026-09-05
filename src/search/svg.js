@@ -1,57 +1,70 @@
 // Поиск SVG на странице
 import { state } from '../state.js';
 import { resolveUrl, getFileName } from '../utils.js';
+import { downloadFile } from '../download.js';
 
 export async function searchSvg() {
     var resultsContainer = document.getElementById("isf-results-container");
-    var e = 0, i = new Set(), r = function (i, r, o) {
-        var n = document.createElement("div");
-        n.className = "isf-grid-item";
-        if (r) {
-            n.innerHTML = '<img src="' + i + '"><div class="isf-overlay">URL</div>';
-            state.foundUrls.add({ url: i, name: o });
+    var count = 0;
+    var seen = new Set();
+
+    // content: <svg>-элемент (inline) или URL (внешний файл)
+    var addTile = function (content, isExternal, fileName) {
+        var tile = document.createElement("div");
+        tile.className = "isf-grid-item";
+
+        var overlay = document.createElement("div");
+        overlay.className = "isf-overlay";
+
+        var downloadUrl;
+        if (isExternal) {
+            var img = document.createElement("img");
+            img.src = content;
+            img.alt = "";
+            tile.appendChild(img);
+            overlay.textContent = "URL";
+            downloadUrl = content;
         } else {
-            var s = i.cloneNode(true);
-            s.removeAttribute("class");
-            s.removeAttribute("style");
-            s.setAttribute("width", "100%");
-            s.setAttribute("height", "100%");
-            s.style.fill = "currentColor";
-            n.appendChild(s);
-            n.innerHTML += '<div class="isf-overlay">Inline</div>';
-            var a = new XMLSerializer().serializeToString(i);
-            var l = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(a);
-            state.foundUrls.add({ url: l, name: "icon.svg" });
-            n.onclick = function () { saveAs(l, o || "vector.svg"); };
+            var clone = content.cloneNode(true);
+            clone.removeAttribute("class");
+            clone.removeAttribute("style");
+            clone.setAttribute("width", "100%");
+            clone.setAttribute("height", "100%");
+            clone.style.fill = "currentColor";
+            tile.appendChild(clone);
+            overlay.textContent = "Inline";
+            var serialized = new XMLSerializer().serializeToString(content);
+            downloadUrl = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(serialized);
         }
-        if (r) {
-            n.onclick = function () { saveAs(i, o); };
-        }
-        resultsContainer.appendChild(n);
-        e++;
+        tile.appendChild(overlay);
+        tile.onclick = function () { downloadFile(downloadUrl, fileName); };
+
+        state.foundUrls.add({ url: downloadUrl, name: fileName });
+        resultsContainer.appendChild(tile);
+        count++;
     };
 
-    document.querySelectorAll("svg").forEach(function (e, t) {
-        var o = e.getBoundingClientRect();
-        if (o.width > 0 && o.height > 0) {
-            // Ключ уникальности — полная сериализация, а не длина строки:
-            // разные SVG с одинаковой длиной не отбрасываются,
-            // одинаковые (повторяющиеся иконки) — схлопываются корректно.
-            var n = new XMLSerializer().serializeToString(e);
-            if (!i.has(n)) {
-                i.add(n);
-                r(e, false, "vector_" + t + ".svg");
+    // Inline <svg>: ключ уникальности — полная сериализация,
+    // а не длина строки (разные SVG с одинаковой длиной не теряются).
+    document.querySelectorAll("svg").forEach(function (el, index) {
+        var rect = el.getBoundingClientRect();
+        if (rect.width > 0 && rect.height > 0) {
+            var key = new XMLSerializer().serializeToString(el);
+            if (!seen.has(key)) {
+                seen.add(key);
+                addTile(el, false, "vector_" + index + ".svg");
             }
         }
     });
 
-    document.querySelectorAll('img[src$=".svg"]').forEach(function (e) {
-        var t = resolveUrl(e.src);
-        if (t && !i.has(t)) {
-            i.add(t);
-            r(t, true, getFileName(t));
+    // Внешние <img src="*.svg">
+    document.querySelectorAll('img[src$=".svg"]').forEach(function (imgEl) {
+        var url = resolveUrl(imgEl.src);
+        if (url && !seen.has(url)) {
+            seen.add(url);
+            addTile(url, true, getFileName(url));
         }
     });
 
-    return e;
+    return count;
 }
