@@ -17,7 +17,7 @@ import { searchDispatcher } from './search/index.js';
 
     // Восстанавливаем позицию кнопки из localStorage
     // (защита: localStorage может быть недоступен, значение — повреждено)
-    var savedPos = { right: 20, bottom: 20 };
+    var savedPos = { right: config.defaultPos.right, bottom: config.defaultPos.bottom };
     try {
         var storedPos = JSON.parse(localStorage.getItem("isf_pos_v3"));
         if (storedPos && "object" === typeof storedPos) savedPos = storedPos;

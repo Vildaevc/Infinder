@@ -80,7 +80,7 @@ const styles = `
     /* Окно — эффект стекла (Glassmorphism) */
     #isf-root #isf-popup {
         position: fixed !important;
-        width: 380px !important;
+        width: ${config.popupWidth}px !important;
         max-height: 80vh !important;
         background: rgba(20, 20, 25, 0.7) !important;
         backdrop-filter: blur(12px);
@@ -436,7 +436,7 @@ const styles = `
         padding: 8px 18px !important;
         border-radius: 20px !important;
         font-size: 13px !important;
-        z-index: 2147483648 !important;
+        z-index: ${config.toastZIndex} !important;
         pointer-events: none;
         opacity: 0;
         transition: opacity 0.3s ease;

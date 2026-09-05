@@ -1,7 +1,7 @@
 {
   "name": "infinder",
-  "version": "1.0.0",
-  "description": "Infinder v2.0 — поиск изображений, SVG, шрифтов, цветов и медиа",
+  "version": "2.7.0",
+  "description": "Infinder — поиск изображений, SVG, шрифтов, цветов и медиа на любой странице",
   "type": "module",
   "scripts": {
     "dev": "vite",
