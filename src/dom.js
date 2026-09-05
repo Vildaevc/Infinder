@@ -29,9 +29,6 @@ export function createWidget() {
                 <span>Infinder</span>
             </div>
             <div class="isf-header-actions">
-                <button class="isf-minimize" id="isf-minimize-btn" title="Свернуть">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                </button>
                 <button class="isf-close" id="isf-close-btn" title="Закрыть">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                 </button>

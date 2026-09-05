@@ -125,11 +125,10 @@ const styles = `
         box-shadow: 0 0 8px ${config.accentColor}40;
     }
 
-    /* Действия в заголовке (минимизация / закрытие) */
+    /* Действия в заголовке */
     #isf-root .isf-header-actions {
         display: flex; gap: 4px;
     }
-    #isf-root .isf-minimize,
     #isf-root .isf-close {
         cursor: pointer;
         width: 28px; height: 28px;
@@ -140,16 +139,10 @@ const styles = `
         color: rgba(255, 255, 255, 0.5);
         transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
-    #isf-root .isf-minimize svg,
     #isf-root .isf-close svg {
         width: 14px; height: 14px;
         display: block;
         pointer-events: none;
-    }
-    #isf-root .isf-minimize:hover {
-        background: rgba(255, 255, 255, 0.12);
-        color: #E2E8F0;
-        transform: translateY(-1px);
     }
     #isf-root .isf-close:hover {
         background: rgba(255, 70, 70, 0.2);
@@ -165,11 +158,6 @@ const styles = `
         gap: 8px !important;
         background: transparent !important;
         border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
-    }
-
-    /* Сворачивание: составной селектор побеждает display:grid !important */
-    #isf-root .isf-controls.infinder-hidden {
-        display: none !important;
     }
 
     /* Кнопки-карточки */
