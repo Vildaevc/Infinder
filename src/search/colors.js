@@ -32,7 +32,10 @@ export async function searchColors() {
         var t = document.createElement("div");
         t.className = "isf-color-item";
         t.style.backgroundColor = e;
-        t.innerHTML = '<div class="isf-color-hex">' + e + '</div>';
+        var hex = document.createElement("div");
+        hex.className = "isf-color-hex";
+        hex.textContent = e;
+        t.appendChild(hex);
         t.onclick = function () {
             var t;
             if (typeof GM_setClipboard !== "undefined") {

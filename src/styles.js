@@ -1,13 +1,14 @@
 // CSS-стили виджета Infinder — современная тёмная тема
 import { config } from './config.js';
 
+// Все селекторы ограничены #isf-root и усилены специфичностью,
+// чтобы глобальные стили сайта-хоста не просачивались внутрь виджета (Фаза 3.2).
 const styles = `
     /* ===== ИЗОЛЯЦИЯ СТИЛЕЙ: сброс наследования CSS сайта-хоста ===== */
-    /* Сбрасываем наследуемые свойства, чтобы не ломать layout position:fixed */
     #isf-root {
         all: initial;
         display: block;
-        font-family: sans-serif;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         font-size: 14px;
         line-height: 1.5;
         color: #E2E8F0;
@@ -19,15 +20,40 @@ const styles = `
         opacity: 1;
         pointer-events: auto;
     }
-    /* Принудительно перебиваем любые внешние стили через !important только на критичных свойствах */
-    #isf-root,
-    #isf-root * {
+    /* Бланкетный сброс для всех потомков (побеждается собственными правилами ниже) */
+    #isf-root *,
+    #isf-root *::before,
+    #isf-root *::after {
         box-sizing: border-box !important;
-        font-family: sans-serif !important;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+        margin: 0;
+        padding: 0;
+        border: 0;
+        border-radius: 0;
+        background: transparent;
+        box-shadow: none;
+        color: inherit;
+        line-height: inherit !important;
+        letter-spacing: normal !important;
+        text-align: inherit;
+        text-transform: none !important;
+        text-decoration: none !important;
+        text-shadow: none !important;
+        vertical-align: baseline;
+    }
+    /* Нейтрализация агрессивной стилизации <button> со стороны хоста */
+    #isf-root button {
+        appearance: none;
+        -webkit-appearance: none;
+        background: none;
+        border: none;
+        font: inherit;
+        color: inherit;
+        cursor: pointer;
     }
 
     /* Главная кнопка */
-    #isf-main-button {
+    #isf-root #isf-main-button {
         position: fixed !important;
         width: ${config.btnSize}px !important;
         height: ${config.btnSize}px !important;
@@ -44,22 +70,21 @@ const styles = `
         transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
         user-select: none;
     }
-    #isf-main-button:hover {
+    #isf-root #isf-main-button:hover {
         box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.25);
         transform: scale(1.08);
     }
-    #isf-main-button:active { cursor: grabbing; transform: scale(0.92); }
-    #isf-main-button svg { width: 22px; height: 22px; opacity: 0.85; pointer-events: none; }
+    #isf-root #isf-main-button:active { cursor: grabbing; transform: scale(0.92); }
+    #isf-root #isf-main-button svg { width: 22px; height: 22px; opacity: 0.85; pointer-events: none; }
 
     /* Окно — эффект стекла (Glassmorphism) */
-    #isf-popup {
+    #isf-root #isf-popup {
         position: fixed !important;
         width: 380px !important;
         max-height: 80vh !important;
         background: rgba(20, 20, 25, 0.7) !important;
         backdrop-filter: blur(12px);
         -webkit-backdrop-filter: blur(12px);
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         border-radius: 16px !important;
         border: 1px solid rgba(255, 255, 255, 0.1) !important;
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
@@ -76,7 +101,7 @@ const styles = `
     }
 
     /* Заголовок — чистый и минималистичный */
-    .isf-header {
+    #isf-root .isf-header {
         padding: 12px 16px !important;
         background: transparent !important;
         border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
@@ -87,13 +112,13 @@ const styles = `
         user-select: none;
         min-height: 48px !important;
     }
-    .isf-header:active { cursor: grabbing; }
-    .isf-title {
+    #isf-root .isf-header:active { cursor: grabbing; }
+    #isf-root .isf-title {
         font-weight: 700; font-size: 14px; color: #E2E8F0;
         display: flex; align-items: center; gap: 10px;
         letter-spacing: 0.3px;
     }
-    .isf-logo {
+    #isf-root .isf-logo {
         width: 8px; height: 8px;
         background: ${config.accentColor};
         border-radius: 50%;
@@ -101,11 +126,11 @@ const styles = `
     }
 
     /* Действия в заголовке (минимизация / закрытие) */
-    .isf-header-actions {
+    #isf-root .isf-header-actions {
         display: flex; gap: 4px;
     }
-    .isf-minimize,
-    .isf-close {
+    #isf-root .isf-minimize,
+    #isf-root .isf-close {
         cursor: pointer;
         width: 28px; height: 28px;
         display: flex; align-items: center; justify-content: center;
@@ -115,19 +140,25 @@ const styles = `
         color: rgba(255, 255, 255, 0.5);
         transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
-    .isf-minimize:hover {
+    #isf-root .isf-minimize svg,
+    #isf-root .isf-close svg {
+        width: 14px; height: 14px;
+        display: block;
+        pointer-events: none;
+    }
+    #isf-root .isf-minimize:hover {
         background: rgba(255, 255, 255, 0.12);
         color: #E2E8F0;
         transform: translateY(-1px);
     }
-    .isf-close:hover {
+    #isf-root .isf-close:hover {
         background: rgba(255, 70, 70, 0.2);
         color: #ff6b6b;
         transform: translateY(-1px);
     }
 
     /* Сетка кнопок парсеров (Grid) */
-    .isf-controls {
+    #isf-root .isf-controls {
         padding: 12px 16px !important;
         display: grid !important;
         grid-template-columns: repeat(5, 1fr) !important;
@@ -136,13 +167,13 @@ const styles = `
         border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
     }
 
-    /* ===== СВОРАЧИВАНИЕ: перебиваем display:grid !important через составной селектор ===== */
-    .isf-controls.infinder-hidden {
+    /* Сворачивание: составной селектор побеждает display:grid !important */
+    #isf-root .isf-controls.infinder-hidden {
         display: none !important;
     }
 
     /* Кнопки-карточки */
-    .isf-btn {
+    #isf-root .isf-btn {
         display: flex !important;
         flex-direction: column !important;
         align-items: center !important;
@@ -160,31 +191,31 @@ const styles = `
         user-select: none;
         min-width: 0 !important;
     }
-    .isf-btn:hover {
+    #isf-root .isf-btn:hover {
         background: rgba(255, 255, 255, 0.15);
         color: #E2E8F0;
         transform: translateY(-2px);
         border-color: rgba(255, 255, 255, 0.15);
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     }
-    .isf-btn:active {
+    #isf-root .isf-btn:active {
         transform: translateY(0px) scale(0.96);
     }
-    .isf-btn.isf-active {
+    #isf-root .isf-btn.isf-active {
         background: ${config.accentColor}25;
         color: ${config.accentColor};
         border-color: ${config.accentColor}50;
         box-shadow: 0 0 16px ${config.accentColor}20;
     }
 
-    .isf-btn-icon {
+    #isf-root .isf-btn-icon {
         width: 18px; height: 18px;
         opacity: 0.7;
         flex-shrink: 0;
     }
-    .isf-btn:hover .isf-btn-icon { opacity: 1; }
-    .isf-btn-label {
-        line-height: 1;
+    #isf-root .isf-btn:hover .isf-btn-icon { opacity: 1; }
+    #isf-root .isf-btn-label {
+        line-height: 1 !important;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -192,7 +223,7 @@ const styles = `
     }
 
     /* Контейнер результатов */
-    #isf-results-container {
+    #isf-root #isf-results-container {
         flex: 1 !important;
         overflow-y: auto !important;
         padding: 12px !important;
@@ -205,23 +236,23 @@ const styles = `
         background: transparent !important;
     }
     /* Кастомный скроллбар */
-    #isf-results-container::-webkit-scrollbar { width: 4px; }
-    #isf-results-container::-webkit-scrollbar-thumb {
+    #isf-root #isf-results-container::-webkit-scrollbar { width: 4px; }
+    #isf-root #isf-results-container::-webkit-scrollbar-thumb {
         background: rgba(255, 255, 255, 0.15);
         border-radius: 2px;
     }
-    #isf-results-container::-webkit-scrollbar-track { background: transparent; }
+    #isf-root #isf-results-container::-webkit-scrollbar-track { background: transparent; }
 
     /* Пустое состояние */
-    .isf-empty-state {
+    #isf-root .isf-empty-state {
         width: 100%; height: 100%;
         display: flex; align-items: center; justify-content: center;
         flex-direction: column; gap: 12px;
         color: rgba(255, 255, 255, 0.3);
         font-size: 13px;
-        padding: 40px 20px;
+        padding: 40px 20px !important;
     }
-    .isf-empty-icon {
+    #isf-root .isf-empty-icon {
         width: 36px; height: 36px;
         opacity: 0.25;
     }
@@ -229,7 +260,7 @@ const styles = `
     /* --- Типы результатов --- */
 
     /* 1. Сетка (Images, SVG) */
-    .isf-grid-item {
+    #isf-root .isf-grid-item {
         width: calc(33.33% - 7px);
         aspect-ratio: 1;
         border: 1px solid rgba(255, 255, 255, 0.08);
@@ -246,33 +277,33 @@ const styles = `
         background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
         background-color: rgba(0, 0, 0, 0.2);
     }
-    .isf-grid-item:hover {
+    #isf-root .isf-grid-item:hover {
         transform: translateY(-2px);
         box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
         border-color: ${config.accentColor}60;
         z-index: 2;
     }
-    .isf-grid-item img, .isf-grid-item svg {
+    #isf-root .isf-grid-item img, #isf-root .isf-grid-item svg {
         width: 100%; height: 100%;
         object-fit: contain;
         display: block;
-        padding: 4px;
+        padding: 4px !important;
     }
-    .isf-overlay {
+    #isf-root .isf-overlay {
         position: absolute; bottom: 0; left: 0; right: 0;
         background: rgba(0, 0, 0, 0.75);
         backdrop-filter: blur(4px);
         -webkit-backdrop-filter: blur(4px);
         color: #E2E8F0; font-size: 10px; font-weight: 600;
-        padding: 4px; text-align: center;
+        padding: 4px !important; text-align: center;
         opacity: 0; transition: opacity 0.2s ease;
     }
-    .isf-grid-item:hover .isf-overlay { opacity: 1; }
+    #isf-root .isf-grid-item:hover .isf-overlay { opacity: 1; }
 
     /* 2. Список (Fonts, Media) */
-    .isf-list-item {
+    #isf-root .isf-list-item {
         width: 100%;
-        padding: 10px 12px;
+        padding: 10px 12px !important;
         background: rgba(255, 255, 255, 0.04);
         border: 1px solid rgba(255, 255, 255, 0.06);
         border-radius: 8px;
@@ -280,33 +311,33 @@ const styles = `
         display: flex; justify-content: space-between; align-items: center;
         transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
-    .isf-list-item:hover {
+    #isf-root .isf-list-item:hover {
         background: rgba(255, 255, 255, 0.08);
         border-color: ${config.accentColor}50;
         transform: translateY(-1px);
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     }
-    .isf-item-name {
+    #isf-root .isf-item-name {
         font-size: 13px; color: #E2E8F0;
         white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 75%;
     }
-    .isf-item-meta {
+    #isf-root .isf-item-meta {
         font-size: 10px; color: rgba(255, 255, 255, 0.4);
         background: rgba(255, 255, 255, 0.06);
-        padding: 2px 8px; border-radius: 4px;
+        padding: 2px 8px !important; border-radius: 4px;
         flex-shrink: 0;
     }
 
     /* Шрифт-превью */
-    .isf-font-preview {
+    #isf-root .isf-font-preview {
         font-size: 16px;
-        margin-top: 4px;
+        margin-top: 4px !important;
         color: rgba(255, 255, 255, 0.7);
         white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
 
     /* 3. Цвета */
-    .isf-color-item {
+    #isf-root .isf-color-item {
         width: calc(20% - 8px);
         aspect-ratio: 1;
         border-radius: 8px;
@@ -316,36 +347,32 @@ const styles = `
         position: relative;
         border: 1px solid rgba(255, 255, 255, 0.1);
     }
-    .isf-color-item:hover {
+    #isf-root .isf-color-item:hover {
         transform: scale(1.12);
         z-index: 2;
         box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
     }
-    .isf-color-hex {
+    #isf-root .isf-color-hex {
         position: absolute; bottom: -22px; left: 50%; transform: translateX(-50%);
         font-size: 10px; background: rgba(0, 0, 0, 0.8); color: #E2E8F0;
-        padding: 2px 6px; border-radius: 4px;
+        padding: 2px 6px !important; border-radius: 4px;
         opacity: 0; pointer-events: none;
         transition: opacity 0.2s ease, bottom 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
         z-index: 10; white-space: nowrap;
     }
-    .isf-color-item:hover .isf-color-hex { opacity: 1; bottom: -28px; }
+    #isf-root .isf-color-item:hover .isf-color-hex { opacity: 1; bottom: -28px; }
 
     /* Кнопка «Сохранить как...»: клик по элементу — быстрая загрузка, кнопка — диалог */
     #isf-root .isf-save-as {
-        appearance: none;
-        -webkit-appearance: none;
-        margin: 0;
         padding: 4px !important;
         border: 1px solid rgba(255, 255, 255, 0.15) !important;
         background: rgba(0, 0, 0, 0.6) !important;
         color: #E2E8F0 !important;
         border-radius: 6px !important;
-        cursor: pointer;
         display: inline-flex !important;
         align-items: center !important;
         justify-content: center !important;
-        line-height: 1;
+        line-height: 1 !important;
         flex-shrink: 0;
         transition: background 0.2s ease, transform 0.2s ease, opacity 0.2s ease;
     }
@@ -359,14 +386,14 @@ const styles = `
         transform: translateY(-1px);
     }
     /* В сетке (картинки, SVG) — угол плитки: видна всегда, ярче при наведении */
-    #isf-root .isf-grid-item .isf-save-as {
+    #isf-root .isf-grid-item > .isf-save-as {
         position: absolute !important;
         top: 5px !important;
         right: 5px !important;
         z-index: 3;
         opacity: 0.45;
     }
-    #isf-root .isf-grid-item:hover .isf-save-as,
+    #isf-root .isf-grid-item:hover > .isf-save-as,
     #isf-root .isf-save-as:focus-visible {
         opacity: 1;
     }
@@ -375,14 +402,14 @@ const styles = `
         display: inline-flex !important;
         align-items: center !important;
         flex-shrink: 0;
-        margin-left: 6px;
+        margin-left: 6px !important;
     }
     #isf-root .isf-list-item .isf-save-as {
         margin-left: 8px;
     }
 
     /* Подвал */
-    .isf-footer {
+    #isf-root .isf-footer {
         padding: 10px 16px !important;
         background: transparent !important;
         border-top: 1px solid rgba(255, 255, 255, 0.06) !important;
@@ -392,23 +419,23 @@ const styles = `
         justify-content: space-between !important;
         align-items: center !important;
     }
-    .isf-dl-btn {
+    #isf-root .isf-dl-btn {
         color: ${config.accentColor};
         font-weight: 600; cursor: pointer;
-        padding: 4px 10px; border-radius: 6px;
+        padding: 4px 10px !important; border-radius: 6px;
         background: ${config.accentColor}15;
         display: none;
         transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
         font-size: 12px;
     }
-    .isf-dl-btn:hover {
+    #isf-root .isf-dl-btn:hover {
         background: ${config.accentColor}30;
         transform: translateY(-1px);
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     }
 
     /* Toast Notification */
-    #isf-toast {
+    #isf-root #isf-toast {
         position: fixed !important;
         bottom: 20px !important;
         left: 50% !important;
