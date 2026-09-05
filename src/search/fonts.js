@@ -1,7 +1,7 @@
 // Поиск шрифтов на странице
 import { state } from '../state.js';
 import { resolveUrl, getFileName } from '../utils.js';
-import { downloadFile } from '../download.js';
+import { downloadFile, createSaveAsButton } from '../download.js';
 
 export async function searchFonts() {
     var resultsContainer = document.getElementById("isf-results-container");
@@ -30,6 +30,7 @@ export async function searchFonts() {
                                         <div style="display:flex;justify-content:space-between">
                                             <span class="isf-item-name">${a}</span>
                                             <span class="isf-item-meta">${getFileName(c).split(".").pop()}</span>
+                                            <span class="isf-item-actions"></span>
                                         </div>
                                         <div class="isf-font-preview" style="font-family: '${a}', sans-serif !important;">
                                             Quick Brown Fox 123
@@ -37,6 +38,10 @@ export async function searchFonts() {
                                     </div>
                                 `;
                             p.onclick = function () { downloadFile(c, getFileName(c)); };
+                            // Кнопка «Сохранить как...» (диалог)
+                            p.querySelector(".isf-item-actions").appendChild(createSaveAsButton(function () {
+                                downloadFile(c, getFileName(c), true);
+                            }));
                             resultsContainer.appendChild(p);
                         }
                     }

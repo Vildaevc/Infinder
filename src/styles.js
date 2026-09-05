@@ -331,6 +331,56 @@ const styles = `
     }
     .isf-color-item:hover .isf-color-hex { opacity: 1; bottom: -28px; }
 
+    /* Кнопка «Сохранить как...»: клик по элементу — быстрая загрузка, кнопка — диалог */
+    #isf-root .isf-save-as {
+        appearance: none;
+        -webkit-appearance: none;
+        margin: 0;
+        padding: 4px !important;
+        border: 1px solid rgba(255, 255, 255, 0.15) !important;
+        background: rgba(0, 0, 0, 0.6) !important;
+        color: #E2E8F0 !important;
+        border-radius: 6px !important;
+        cursor: pointer;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        line-height: 1;
+        flex-shrink: 0;
+        transition: background 0.2s ease, transform 0.2s ease, opacity 0.2s ease;
+    }
+    #isf-root .isf-save-as svg {
+        width: 14px; height: 14px;
+        display: block;
+        pointer-events: none;
+    }
+    #isf-root .isf-save-as:hover {
+        background: rgba(0, 0, 0, 0.85) !important;
+        transform: translateY(-1px);
+    }
+    /* В сетке (картинки, SVG) — угол плитки: видна всегда, ярче при наведении */
+    #isf-root .isf-grid-item .isf-save-as {
+        position: absolute !important;
+        top: 5px !important;
+        right: 5px !important;
+        z-index: 3;
+        opacity: 0.45;
+    }
+    #isf-root .isf-grid-item:hover .isf-save-as,
+    #isf-root .isf-save-as:focus-visible {
+        opacity: 1;
+    }
+    /* В списках (шрифты, медиа) — в конце строки */
+    #isf-root .isf-item-actions {
+        display: inline-flex !important;
+        align-items: center !important;
+        flex-shrink: 0;
+        margin-left: 6px;
+    }
+    #isf-root .isf-list-item .isf-save-as {
+        margin-left: 8px;
+    }
+
     /* Подвал */
     .isf-footer {
         padding: 10px 16px !important;

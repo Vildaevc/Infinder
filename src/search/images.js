@@ -1,7 +1,7 @@
 // Поиск изображений на странице
 import { state } from '../state.js';
 import { resolveUrl, getFileName } from '../utils.js';
-import { downloadFile } from '../download.js';
+import { downloadFile, createSaveAsButton } from '../download.js';
 
 // Одновременно грузим не более BATCH кандидатов (не «вешаем» тяжёлые страницы)
 var BATCH = 16;
@@ -61,6 +61,10 @@ export async function searchImages() {
                     overlay.textContent = probe.naturalWidth + "x" + probe.naturalHeight;
                     tile.appendChild(overlay);
                     tile.onclick = function () { downloadFile(url, getFileName(url)); };
+                    // Кнопка «Сохранить как...» (диалог) в углу плитки
+                    tile.appendChild(createSaveAsButton(function () {
+                        downloadFile(url, getFileName(url), true);
+                    }));
                     resultsContainer.appendChild(tile);
                     state.foundUrls.add({ url: url, name: getFileName(url) });
                     added++;

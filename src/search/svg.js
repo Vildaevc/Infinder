@@ -1,7 +1,7 @@
 // Поиск SVG на странице
 import { state } from '../state.js';
 import { resolveUrl, getFileName } from '../utils.js';
-import { downloadFile } from '../download.js';
+import { downloadFile, createSaveAsButton } from '../download.js';
 
 export async function searchSvg() {
     var resultsContainer = document.getElementById("isf-results-container");
@@ -38,6 +38,10 @@ export async function searchSvg() {
         }
         tile.appendChild(overlay);
         tile.onclick = function () { downloadFile(downloadUrl, fileName); };
+        // Кнопка «Сохранить как...» (диалог) в углу плитки
+        tile.appendChild(createSaveAsButton(function () {
+            downloadFile(downloadUrl, fileName, true);
+        }));
 
         state.foundUrls.add({ url: downloadUrl, name: fileName });
         resultsContainer.appendChild(tile);
