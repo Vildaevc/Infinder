@@ -42,7 +42,7 @@ const contractRules = [
 
 export default [
     {
-        ignores: ['dist/**', 'node_modules/**', 'archive/**']
+        ignores: ['dist/**', 'node_modules/**']
     },
     js.configs.recommended,
     {
