@@ -1,0 +1,33 @@
+name: Release
+
+# Публикация релиза с готовым userscript.
+# Запуск: git tag v2.7.0 && git push origin v2.7.0
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Установка зависимостей
+        run: npm ci
+
+      - name: Сборка и проверка
+        run: npm run check
+
+      - name: GitHub Release с файлом userscript
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/infinder.user.js
+          generate_release_notes: true

@@ -3,6 +3,13 @@
 * text=auto
 
 # Исходники, конфиги и документация — всегда LF
+# (для dist это важно: CI сравнивает собранный файл с закоммиченным)
 *.js   text eol=lf
+*.mjs  text eol=lf
 *.json text eol=lf
 *.md   text eol=lf
+*.yml  text eol=lf
+
+# Собранный userscript — текстовый файл, но не «исходник»
+dist/infinder.user.js text eol=lf
+

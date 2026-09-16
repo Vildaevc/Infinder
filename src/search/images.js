@@ -20,7 +20,9 @@ export async function searchImages() {
         candidates.push(url);
     };
 
+    var widget = document.getElementById("isf-root");
     document.querySelectorAll("img").forEach(function (img) {
+        if (widget && widget.contains(img)) return;
         if (img.src) collect(img.src);
         if (img.srcset) {
             img.srcset.split(",").forEach(function (part) {

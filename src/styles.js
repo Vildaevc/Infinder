@@ -333,7 +333,7 @@ const styles = `
     #isf-root .isf-grid-item.isf-broken svg {
         width: 26px; height: 26px;
         opacity: 0.35;
-        padding: 0;
+        padding: 0 !important;
     }
 
     /* 2. Список (Fonts, Media) */
@@ -439,9 +439,6 @@ const styles = `
         align-items: center !important;
         flex-shrink: 0;
         margin-left: 6px !important;
-    }
-    #isf-root .isf-list-item .isf-save-as {
-        margin-left: 8px;
     }
 
     /* Подвал */

@@ -1,7 +1,7 @@
 {
   "name": "infinder",
   "version": "2.7.0",
-  "description": "Infinder — поиск изображений, SVG, шрифтов, цветов и медиа на любой странице",
+  "description": "Infinder — userscript для поиска изображений, SVG, шрифтов, цветов и медиа на любой странице",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -9,9 +9,28 @@
     "check": "node scripts/check-build.mjs",
     "test": "node scripts/check-build.mjs"
   },
-  "keywords": [],
-  "author": "IdeaNova",
-  "license": "ISC",
+  "keywords": [
+    "userscript",
+    "tampermonkey",
+    "violentmonkey",
+    "orangemonkey",
+    "images",
+    "svg",
+    "fonts",
+    "colors",
+    "media",
+    "scraper"
+  ],
+  "author": "Vildaevc (https://github.com/Vildaevc)",
+  "license": "MIT",
+  "homepage": "https://github.com/Vildaevc/Infinder#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Vildaevc/Infinder.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Vildaevc/Infinder/issues"
+  },
   "devDependencies": {
     "vite": "^7.3.2",
     "vite-plugin-monkey": "^7.1.9"

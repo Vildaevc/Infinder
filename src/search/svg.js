@@ -5,6 +5,9 @@ import { downloadFile, createSaveAsButton } from '../download.js';
 
 export async function searchSvg() {
     var resultsContainer = document.getElementById("isf-results-container");
+    // Иконки самого виджета (кнопка, кнопки категорий, крестик) — не результаты поиска
+    var widget = document.getElementById("isf-root");
+    var inWidget = function (el) { return widget && widget.contains(el); };
     var count = 0;
     var seen = new Set();
 
@@ -51,6 +54,7 @@ export async function searchSvg() {
     // Inline <svg>: ключ уникальности — полная сериализация,
     // а не длина строки (разные SVG с одинаковой длиной не теряются).
     document.querySelectorAll("svg").forEach(function (el, index) {
+        if (inWidget(el)) return;
         var rect = el.getBoundingClientRect();
         if (rect.width > 0 && rect.height > 0) {
             var key = new XMLSerializer().serializeToString(el);
@@ -61,8 +65,9 @@ export async function searchSvg() {
         }
     });
 
-    // Внешние <img src="*.svg">
-    document.querySelectorAll('img[src$=".svg"]').forEach(function (imgEl) {
+    // Внешние <img src="*.svg"> (регистр расширения не важен: .svg/.SVG)
+    document.querySelectorAll('img[src$=".svg" i]').forEach(function (imgEl) {
+        if (inWidget(imgEl)) return;
         var url = resolveUrl(imgEl.src);
         if (url && !seen.has(url)) {
             seen.add(url);

@@ -9,12 +9,22 @@ import { fileURLToPath } from 'node:url';
 const DIST = fileURLToPath(new URL('../dist/infinder.user.js', import.meta.url));
 const pkg = JSON.parse(readFileSync(fileURLToPath(new URL('../package.json', import.meta.url)), 'utf8'));
 
+const REPO = 'https://github.com/Vildaevc/Infinder';
+const BUILD_URL = 'https://raw.githubusercontent.com/Vildaevc/Infinder/main/dist/infinder.user.js';
+
 // Обязательные фрагменты метаданных
 const required = [
     ['баннер userscript', '==UserScript=='],
-    ['имя', '@name'],
-    ['namespace', '@namespace    http://tampermonkey.net/'],
+    ['имя', '@name         Infinder'],
+    ['namespace (GitHub)', '@namespace    ' + REPO],
     ['версия (из package.json)', '@version      ' + pkg.version],
+    ['автор', '@author       Vildaevc'],
+    ['лицензия', '@license      MIT'],
+    ['описание', '@description'],
+    ['homepageURL', '@homepageURL  ' + REPO],
+    ['supportURL', '@supportURL   ' + REPO + '/issues'],
+    ['updateURL (авто-обновление)', '@updateURL    ' + BUILD_URL],
+    ['downloadURL', '@downloadURL  ' + BUILD_URL],
     ['match все сайты', '@match        *://*/*'],
     ['grant GM_download', '@grant        GM_download'],
     ['grant GM_addStyle', '@grant        GM_addStyle'],

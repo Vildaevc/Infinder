@@ -81,6 +81,12 @@ export async function searchColors() {
 
     var sorted = Object.keys(counts).sort(function (a, b) { return counts[b] - counts[a]; });
 
+    var showToast = function (text) {
+        toast.textContent = text;
+        toast.style.opacity = 1;
+        setTimeout(function () { toast.style.opacity = 0; }, 2000);
+    };
+
     sorted.forEach(function (key) {
         var chip = document.createElement("div");
         chip.className = "isf-color-item";
@@ -92,14 +98,23 @@ export async function searchColors() {
         chip.appendChild(label);
 
         chip.onclick = function () {
-            if (typeof GM_setClipboard !== "undefined") {
-                GM_setClipboard(key);
-            } else {
-                navigator.clipboard.writeText(key);
+            // Копирование: GM_setClipboard, затем Clipboard API (может быть недоступен
+            // в небезопасном контексте или без фокуса) — с явной обратной связью.
+            try {
+                if (typeof GM_setClipboard !== "undefined") {
+                    GM_setClipboard(key);
+                    showToast("Скопировано: " + key);
+                } else if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(key).then(
+                        function () { showToast("Скопировано: " + key); },
+                        function () { showToast("Не удалось скопировать"); }
+                    );
+                } else {
+                    showToast("Буфер обмена недоступен");
+                }
+            } catch (err) {
+                showToast("Не удалось скопировать");
             }
-            toast.textContent = "Скопировано: " + key;
-            toast.style.opacity = 1;
-            setTimeout(function () { toast.style.opacity = 0; }, 2000);
         };
         resultsContainer.appendChild(chip);
     });
