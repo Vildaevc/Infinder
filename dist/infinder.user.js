@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Infinder
 // @namespace    https://github.com/Vildaevc/Infinder
-// @version      2.7.0
+// @version      2.7.1
 // @author       Vildaevc
 // @description  Поиск изображений, SVG, шрифтов, цветов и медиа на любой странице.
 // @license      MIT
@@ -98,8 +98,9 @@ defaultPos: { right: 20, bottom: 20 }
         z-index: ${config.zIndex} !important;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.15);
         transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
-        user-select: none;
-        -webkit-user-select: none;
+        user-select: none !important;
+        -webkit-user-select: none !important;
+        -webkit-user-drag: none;
         touch-action: none !important;
     }
     #isf-root #isf-main-button:hover {
@@ -160,8 +161,9 @@ defaultPos: { right: 20, bottom: 20 }
         justify-content: space-between !important;
         align-items: center !important;
         cursor: grab;
-        user-select: none;
-        -webkit-user-select: none;
+        user-select: none !important;
+        -webkit-user-select: none !important;
+        -webkit-user-drag: none;
         touch-action: none !important;
         min-height: 48px !important;
     }
@@ -590,10 +592,14 @@ defaultPos: { right: 20, bottom: 20 }
       toast
     };
   }
+  var INTERACTIVE = "button, a, input, select, textarea";
   function makeDraggable(el, handle) {
     var dragging = false;
     var pointerId = null;
     var startX = 0, startY = 0, originLeft = 0, originTop = 0;
+    el.addEventListener("dragstart", function(evt) {
+      evt.preventDefault();
+    });
     function onPointerMove(evt) {
       if (pointerId !== null && evt.pointerId !== pointerId) return;
       var dx = evt.clientX - startX;
@@ -601,6 +607,12 @@ defaultPos: { right: 20, bottom: 20 }
       if (!dragging && (Math.abs(dx) > 3 || Math.abs(dy) > 3)) {
         dragging = true;
         el.style.cursor = "grabbing";
+        if (pointerId !== null && el.setPointerCapture) {
+          try {
+            el.setPointerCapture(pointerId);
+          } catch (ignore) {
+          }
+        }
       }
       if (!dragging) return;
       evt.preventDefault();
@@ -638,6 +650,7 @@ defaultPos: { right: 20, bottom: 20 }
     }
     (handle || el).addEventListener("pointerdown", function(evt) {
       if (0 !== evt.button) return;
+      if (evt.target && evt.target.closest && evt.target.closest(INTERACTIVE)) return;
       dragging = false;
       pointerId = evt.pointerId;
       startX = evt.clientX;
@@ -649,12 +662,6 @@ defaultPos: { right: 20, bottom: 20 }
       el.style.bottom = "auto";
       el.style.left = originLeft + "px";
       el.style.top = originTop + "px";
-      if (el.setPointerCapture) {
-        try {
-          el.setPointerCapture(evt.pointerId);
-        } catch (ignore) {
-        }
-      }
       document.addEventListener("pointermove", onPointerMove);
       document.addEventListener("pointerup", onPointerUp);
       document.addEventListener("pointercancel", onPointerUp);

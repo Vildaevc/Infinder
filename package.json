@@ -1,6 +1,6 @@
 {
   "name": "infinder",
-  "version": "2.7.0",
+  "version": "2.7.1",
   "description": "Infinder — userscript для поиска изображений, SVG, шрифтов, цветов и медиа на любой странице",
   "type": "module",
   "scripts": {

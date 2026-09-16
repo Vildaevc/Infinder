@@ -1,9 +1,17 @@
 // Перетаскивание элементов виджета Infinder.
 // Pointer Events: работает и мышью, и пальцем (тач-экраны), и стилусом.
+
+// Клики по этим элементам внутри перетаскиваемой области — не перетаскивание,
+// а обычное нажатие (например, кнопка «Закрыть» в заголовке окна).
+var INTERACTIVE = "button, a, input, select, textarea";
+
 export function makeDraggable(el, handle) {
     var dragging = false;
     var pointerId = null;
     var startX = 0, startY = 0, originLeft = 0, originTop = 0;
+
+    // Нативный drag (выделенный текст, картинка) не должен подменять перетаскивание окна
+    el.addEventListener("dragstart", function (evt) { evt.preventDefault(); });
 
     function onPointerMove(evt) {
         if (pointerId !== null && evt.pointerId !== pointerId) return;
@@ -14,6 +22,12 @@ export function makeDraggable(el, handle) {
         if (!dragging && (Math.abs(dx) > 3 || Math.abs(dy) > 3)) {
             dragging = true;
             el.style.cursor = "grabbing";
+            // Захват указателя — только когда перетаскивание реально началось:
+            // иначе браузер перенаправляет click на сам элемент и клики
+            // по кнопкам внутри окна не доходят до их обработчиков
+            if (pointerId !== null && el.setPointerCapture) {
+                try { el.setPointerCapture(pointerId); } catch (ignore) { /* не критично */ }
+            }
         }
         if (!dragging) return;
 
@@ -51,6 +65,9 @@ export function makeDraggable(el, handle) {
 
     (handle || el).addEventListener("pointerdown", function (evt) {
         if (0 !== evt.button) return; // только основная кнопка мыши / касание
+        // Нажатие на кнопку/ссылку внутри области — не начинаем перетаскивание
+        if (evt.target && evt.target.closest && evt.target.closest(INTERACTIVE)) return;
+
         dragging = false;
         pointerId = evt.pointerId;
         startX = evt.clientX;
@@ -64,10 +81,6 @@ export function makeDraggable(el, handle) {
         el.style.left = originLeft + "px";
         el.style.top = originTop + "px";
 
-        // Захват указателя: движение отслеживается даже за пределами элемента
-        if (el.setPointerCapture) {
-            try { el.setPointerCapture(evt.pointerId); } catch (ignore) { /* не критично */ }
-        }
         document.addEventListener("pointermove", onPointerMove);
         document.addEventListener("pointerup", onPointerUp);
         document.addEventListener("pointercancel", onPointerUp);
