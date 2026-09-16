@@ -143,18 +143,15 @@ src/
 ## Тестирование
 
 - Автоматически: `npm run lint` (ESLint + контракты проекта) и `npm run check` (сборка и проверка метаданных userscript: имя, версия, `@match`, `@grant`, отсутствие внешних `@require`).
-- Вручную: чек-лист в [DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md) (раздел «Чек-лист ручного тестирования»).
-- История работ по фазам — в [DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md) (раздел «Статус выполнения»), технический разбор кода — в [Projects_analysis.md](Projects_analysis.md).
+- Вручную: чек-лист ручного тестирования — в [AGENTS.md](AGENTS.md) (раздел «Чек-лист ручного тестирования»).
 
 ## Документация репозитория
 
 | Файл | Назначение |
 |---|---|
 | [README.md](README.md) | Этот файл: установка, сборка, возможности |
-| [AGENTS.md](AGENTS.md) | Правила и конвенции разработки (в том числе для ИИ-агентов) |
+| [AGENTS.md](AGENTS.md) | Правила, конвенции разработки и чек-лист тестирования (в том числе для ИИ-агентов) |
 | [CHANGELOG.md](CHANGELOG.md) | История версий |
-| [DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md) | Дорожная карта, статус фаз, чек-лист тестирования |
-| [Projects_analysis.md](Projects_analysis.md) | Технический анализ проекта |
 | [LICENSE.md](LICENSE.md) | Лицензия MIT |
 
 ---
