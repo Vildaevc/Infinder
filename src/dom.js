@@ -66,7 +66,6 @@ export function createWidget() {
         </div>
         <div class="isf-footer">
             <span id="isf-status">${t("statusIdle")}</span>
-            <span class="isf-dl-btn" id="isf-dl-all">${t("downloadAll")}</span>
         </div>
     `;
     root.appendChild(popup);

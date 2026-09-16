@@ -490,20 +490,6 @@ defaultPos: { right: 20, bottom: 20 }
         justify-content: space-between !important;
         align-items: center !important;
     }
-    #isf-root .isf-dl-btn {
-        color: ${config.accentColor};
-        font-weight: 600; cursor: pointer;
-        padding: 4px 10px !important; border-radius: 6px;
-        background: ${config.accentColor}15;
-        display: none;
-        transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-        font-size: 12px;
-    }
-    #isf-root .isf-dl-btn:hover {
-        background: ${config.accentColor}30;
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    }
 
     /* Toast Notification */
     #isf-root #isf-toast {
@@ -546,9 +532,6 @@ defaultPos: { right: 20, bottom: 20 }
       notFound_fonts: "No fonts found",
       notFound_media: "No media found",
       notFound_generic: "Nothing found",
-      downloadAll: "Download all",
-      downloadAllCount: "Download all ({n})",
-      confirmDownload: "Download {n} files?",
       saveAs: "Save as...",
       copied: "Copied: {value}",
       copyFailed: "Couldn't copy",
@@ -574,9 +557,6 @@ defaultPos: { right: 20, bottom: 20 }
       notFound_fonts: "Шрифты не найдены",
       notFound_media: "Медиа не найдены",
       notFound_generic: "Ничего не найдено",
-      downloadAll: "Скачать все",
-      downloadAllCount: "Скачать все ({n})",
-      confirmDownload: "Скачать {n} файлов?",
       saveAs: "Сохранить как...",
       copied: "Скопировано: {value}",
       copyFailed: "Не удалось скопировать",
@@ -658,7 +638,6 @@ defaultPos: { right: 20, bottom: 20 }
         </div>
         <div class="isf-footer">
             <span id="isf-status">${t("statusIdle")}</span>
-            <span class="isf-dl-btn" id="isf-dl-all">${t("downloadAll")}</span>
         </div>
     `;
     root.appendChild(popup);
@@ -751,9 +730,23 @@ defaultPos: { right: 20, bottom: 20 }
     };
   }
   const state = {
-    isSearching: false,
-    foundUrls: new Set()
+    isSearching: false
   };
+  function resolveUrl(e) {
+    try {
+      return new URL(e, document.baseURI).href;
+    } catch (t2) {
+      return null;
+    }
+  }
+  function getFileName(e) {
+    try {
+      if (e.startsWith("data:")) return "file";
+      return new URL(e).pathname.split("/").pop() || "file";
+    } catch (t2) {
+      return "file";
+    }
+  }
   var MAX_BLOB_SIZE = 256 * 1024 * 1024;
   function anchorDownload(href, name, revoke) {
     var link = document.createElement("a");
@@ -808,21 +801,6 @@ defaultPos: { right: 20, bottom: 20 }
       onSaveAs();
     });
     return btn;
-  }
-  function resolveUrl(e) {
-    try {
-      return new URL(e, document.baseURI).href;
-    } catch (t2) {
-      return null;
-    }
-  }
-  function getFileName(e) {
-    try {
-      if (e.startsWith("data:")) return "file";
-      return new URL(e).pathname.split("/").pop() || "file";
-    } catch (t2) {
-      return "file";
-    }
   }
   var BATCH$1 = 300;
   async function scanPageElements(each) {
@@ -957,7 +935,6 @@ defaultPos: { right: 20, bottom: 20 }
             tile.appendChild(createSaveAsButton(function() {
               downloadFile(url, name, true);
             }));
-            state.foundUrls.add({ url, name });
             var area = width * height;
             var index = loadedTiles.length;
             while (index > 0 && loadedTiles[index - 1].area < area) index--;
@@ -1020,7 +997,6 @@ defaultPos: { right: 20, bottom: 20 }
       tile.appendChild(createSaveAsButton(function() {
         downloadFile(downloadUrl, fileName, true);
       }));
-      state.foundUrls.add({ url: downloadUrl, name: fileName });
       resultsContainer.appendChild(tile);
       count++;
     };
@@ -1170,7 +1146,6 @@ defaultPos: { right: 20, bottom: 20 }
             var c = resolveUrl(m[1]);
             if (!c || c.startsWith("data:") || e.has(c)) continue;
             e.add(c);
-            state.foundUrls.add({ url: c, name: getFileName(c) });
             i++;
             var row = document.createElement("div");
             row.className = "isf-list-item";
@@ -1236,7 +1211,6 @@ defaultPos: { right: 20, bottom: 20 }
       if (!url || seen.has(url)) return;
       if (0 === url.indexOf("blob:")) return;
       seen.add(url);
-      state.foundUrls.add({ url, name: getFileName(url) });
       count++;
       var row = document.createElement("div");
       row.className = "isf-list-item";
@@ -1276,13 +1250,10 @@ defaultPos: { right: 20, bottom: 20 }
   async function searchDispatcher(action) {
     var resultsContainer = document.getElementById("isf-results-container");
     var statusEl = document.getElementById("isf-status");
-    var dlAllBtn = document.getElementById("isf-dl-all");
     if (state.isSearching) return;
     state.isSearching = true;
     resultsContainer.innerHTML = LOADER_HTML;
-    state.foundUrls.clear();
     statusEl.textContent = t("statusScanning");
-    dlAllBtn.style.display = "none";
     await new Promise(function(resolve) {
       setTimeout(resolve, 50);
     });
@@ -1295,25 +1266,10 @@ defaultPos: { right: 20, bottom: 20 }
       else if ("fonts" === action) count = await searchFonts();
       else if ("media" === action) count = await searchMedia();
       statusEl.textContent = t("statusFound", { n: count });
-      if ("colors" !== action && count > 0) {
-        dlAllBtn.style.display = "block";
-        dlAllBtn.textContent = t("downloadAllCount", { n: count });
-        dlAllBtn.onclick = function() {
-          var files = Array.from(state.foundUrls);
-          if (!files.length) return;
-          if (!confirm(t("confirmDownload", { n: files.length }))) return;
-          files.forEach(function(item, index) {
-            setTimeout(function() {
-              downloadFile(item.url, item.name);
-            }, 500 * index);
-          });
-        };
-      }
     } catch (err) {
       failed = true;
       console.error(err);
       statusEl.textContent = t("statusError");
-      dlAllBtn.style.display = "none";
     } finally {
       state.isSearching = false;
       var loading = resultsContainer.querySelector(".isf-loading");

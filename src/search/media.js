@@ -1,5 +1,4 @@
 // Поиск медиа-файлов на странице
-import { state } from '../state.js';
 import { resolveUrl, getFileName } from '../utils.js';
 import { downloadFile, createSaveAsButton } from '../download.js';
 
@@ -28,7 +27,6 @@ export async function searchMedia() {
         // blob: — это MSE-поток (плеер), а не файл: скачать его нельзя
         if (0 === url.indexOf("blob:")) return;
         seen.add(url);
-        state.foundUrls.add({ url: url, name: getFileName(url) });
         count++;
 
         var row = document.createElement("div");

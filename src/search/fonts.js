@@ -1,5 +1,4 @@
 // Поиск шрифтов на странице
-import { state } from '../state.js';
 import { resolveUrl, getFileName } from '../utils.js';
 import { downloadFile, createSaveAsButton } from '../download.js';
 
@@ -24,7 +23,6 @@ export async function searchFonts() {
                     var c = resolveUrl(m[1]);
                     if (!c || c.startsWith("data:") || e.has(c)) continue;
                     e.add(c);
-                    state.foundUrls.add({ url: c, name: getFileName(c) });
                     i++;
 
                     // Строка результата собирается через DOM API — без innerHTML,

@@ -458,20 +458,6 @@ const styles = `
         justify-content: space-between !important;
         align-items: center !important;
     }
-    #isf-root .isf-dl-btn {
-        color: ${config.accentColor};
-        font-weight: 600; cursor: pointer;
-        padding: 4px 10px !important; border-radius: 6px;
-        background: ${config.accentColor}15;
-        display: none;
-        transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-        font-size: 12px;
-    }
-    #isf-root .isf-dl-btn:hover {
-        background: ${config.accentColor}30;
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    }
 
     /* Toast Notification */
     #isf-root #isf-toast {

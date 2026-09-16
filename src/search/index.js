@@ -1,6 +1,5 @@
 // Диспетчер поиска
 import { state } from '../state.js';
-import { downloadFile } from '../download.js';
 import { t } from '../i18n.js';
 import { searchImages } from './images.js';
 import { searchSvg } from './svg.js';
@@ -13,13 +12,10 @@ var LOADER_HTML = '<div class="isf-loading"><span class="isf-spinner"></span></d
 export async function searchDispatcher(action) {
     var resultsContainer = document.getElementById("isf-results-container");
     var statusEl = document.getElementById("isf-status");
-    var dlAllBtn = document.getElementById("isf-dl-all");
     if (state.isSearching) return;
     state.isSearching = true;
     resultsContainer.innerHTML = LOADER_HTML; // спиннер на время поиска
-    state.foundUrls.clear();
     statusEl.textContent = t("statusScanning");
-    dlAllBtn.style.display = "none";
 
     // Даём браузеру отрисовать спиннер до начала сканирования
     await new Promise(function (resolve) { setTimeout(resolve, 50); });
@@ -35,27 +31,10 @@ export async function searchDispatcher(action) {
         else if ("media" === action) count = await searchMedia();
 
         statusEl.textContent = t("statusFound", { n: count });
-
-        if ("colors" !== action && count > 0) {
-            dlAllBtn.style.display = "block";
-            dlAllBtn.textContent = t("downloadAllCount", { n: count });
-            dlAllBtn.onclick = function () {
-                // Все записи foundUrls — {url, name} (единый формат, Фаза 2.2)
-                var files = Array.from(state.foundUrls);
-                if (!files.length) return;
-                if (!confirm(t("confirmDownload", { n: files.length }))) return;
-                files.forEach(function (item, index) {
-                    setTimeout(function () {
-                        downloadFile(item.url, item.name);
-                    }, 500 * index);
-                });
-            };
-        }
     } catch (err) {
         failed = true;
         console.error(err);
         statusEl.textContent = t("statusError");
-        dlAllBtn.style.display = "none";
     } finally {
         state.isSearching = false;
         var loading = resultsContainer.querySelector(".isf-loading");

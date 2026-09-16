@@ -91,7 +91,6 @@ Also:
 
 - **Click an item** — quick download into the browser's downloads folder;
 - **Floppy-disk button** on every item — system **"Save as…"** dialog;
-- **"Download all"** — batch download of every found file (0.5 s pause between files);
 - spinner while scanning and clear per-category empty states;
 - the button and the panel are draggable (mouse, touch, stylus) and the button position is remembered;
 - dark glassmorphism theme, fully isolated from the host page styles;

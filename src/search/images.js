@@ -1,5 +1,4 @@
 // Поиск изображений на странице
-import { state } from '../state.js';
 import { resolveUrl, getFileName } from '../utils.js';
 import { downloadFile, createSaveAsButton } from '../download.js';
 import { scanPageElements } from '../scan.js';
@@ -99,7 +98,7 @@ export async function searchImages() {
     });
 
     // Плитка-заглушка для изображения, которое не удалось загрузить.
-    // В foundUrls и счётчик не попадает (Скачать все не качает битые URL).
+    // В счётчик не попадает: битая картинка не считается найденной.
     var addBrokenTile = function (url) {
         var tile = document.createElement("div");
         tile.className = "isf-grid-item isf-broken";
@@ -108,9 +107,8 @@ export async function searchImages() {
         resultsContainer.appendChild(tile);
     };
 
-    // Грузим каждый кандидат: плитка и foundUrls добавляются только
-    // при успешной загрузке, поэтому «Найдено: N» == числу плиток,
-    // а «Скачать все» не качает битые URL.
+    // Грузим каждый кандидат: плитка добавляется только при успешной
+    // загрузке, поэтому «Найдено: N» совпадает с числом плиток.
     // Плитки вставляются по убыванию разрешения (W*H): самые крупные — первыми.
     var added = 0;
     var loadedTiles = [];
@@ -148,7 +146,6 @@ export async function searchImages() {
                     tile.appendChild(createSaveAsButton(function () {
                         downloadFile(url, name, true);
                     }));
-                    state.foundUrls.add({ url: url, name: name });
 
                     // Позиция по убыванию разрешения (сортировка вставками)
                     var area = width * height;

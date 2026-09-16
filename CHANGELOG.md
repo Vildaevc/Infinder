@@ -10,6 +10,10 @@ All notable changes to this project. The format is loosely based on [Keep a Chan
 - Localized userscript metadata: `@description:en` / `@description:ru`, so the userscript manager shows the description in the user's language.
 - Bilingual documentation: [README.md](README.md) is now English (primary), [README.ru.md](README.ru.md) is the Russian version, with language switchers in both.
 
+### Removed
+
+- **The "Download all" button and its batch-download logic** — the behavior was unpredictable, so it was taken out for now. Use per-item download (a click) or the "Save as…" button instead. Together with it went the now-unused `state.foundUrls` collection and the related UI strings.
+
 ### Changed
 
 - Widget markup, statuses, toasts and tooltips no longer contain hardcoded Russian text — everything goes through `t()` from `src/i18n.js`.
