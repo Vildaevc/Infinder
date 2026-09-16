@@ -15,9 +15,23 @@ export async function searchImages() {
     // Собираем уникальные URL-кандидаты
     var collect = function (rawUrl) {
         var url = resolveUrl(rawUrl);
-        if (!url || seen.has(url) || url.match(/\.(svg)$/i)) return;
+        if (!url || seen.has(url)) return;
+        // Расширение проверяем по пути: icon.svg?ver=2 — тоже SVG
+        var path = url;
+        try { path = new URL(url).pathname; } catch (ignore) { /* data: и подобное */ }
+        if (/\.svg$/i.test(path)) return; // SVG — отдельная категория
         seen.add(url);
         candidates.push(url);
+    };
+
+    // Имя файла: у data:-картинок его нет, поэтому берём расширение из MIME
+    var nameFor = function (url) {
+        if (0 === url.indexOf("data:")) {
+            var m = /^data:image\/([a-z0-9.+-]+)/i.exec(url);
+            var ext = m ? m[1].toLowerCase().replace("jpeg", "jpg").replace("svg+xml", "svg") : "png";
+            return "image." + ext;
+        }
+        return getFileName(url);
     };
 
     var widget = document.getElementById("isf-root");
@@ -71,6 +85,7 @@ export async function searchImages() {
             return new Promise(function (resolve) {
                 var probe = new Image();
                 probe.onload = function () {
+                    var name = nameFor(url);
                     var tile = document.createElement("div");
                     tile.className = "isf-grid-item";
                     // probe уже загружен — вставляем его без повторного запроса
@@ -79,12 +94,12 @@ export async function searchImages() {
                     overlay.className = "isf-overlay";
                     overlay.textContent = probe.naturalWidth + "x" + probe.naturalHeight;
                     tile.appendChild(overlay);
-                    tile.onclick = function () { downloadFile(url, getFileName(url)); };
+                    tile.onclick = function () { downloadFile(url, name); };
                     // Кнопка «Сохранить как...» (диалог) в углу плитки
                     tile.appendChild(createSaveAsButton(function () {
-                        downloadFile(url, getFileName(url), true);
+                        downloadFile(url, name, true);
                     }));
-                    state.foundUrls.add({ url: url, name: getFileName(url) });
+                    state.foundUrls.add({ url: url, name: name });
 
                     // Позиция по убыванию разрешения (сортировка вставками)
                     var area = probe.naturalWidth * probe.naturalHeight;

@@ -730,9 +730,23 @@ defaultPos: { right: 20, bottom: 20 }
     var candidates = [];
     var collect = function(rawUrl) {
       var url = resolveUrl(rawUrl);
-      if (!url || seen.has(url) || url.match(/\.(svg)$/i)) return;
+      if (!url || seen.has(url)) return;
+      var path = url;
+      try {
+        path = new URL(url).pathname;
+      } catch (ignore) {
+      }
+      if (/\.svg$/i.test(path)) return;
       seen.add(url);
       candidates.push(url);
+    };
+    var nameFor = function(url) {
+      if (0 === url.indexOf("data:")) {
+        var m = /^data:image\/([a-z0-9.+-]+)/i.exec(url);
+        var ext = m ? m[1].toLowerCase().replace("jpeg", "jpg").replace("svg+xml", "svg") : "png";
+        return "image." + ext;
+      }
+      return getFileName(url);
     };
     var widget = document.getElementById("isf-root");
     document.querySelectorAll("img").forEach(function(img) {
@@ -774,6 +788,7 @@ defaultPos: { right: 20, bottom: 20 }
         return new Promise(function(resolve) {
           var probe = new Image();
           probe.onload = function() {
+            var name = nameFor(url);
             var tile = document.createElement("div");
             tile.className = "isf-grid-item";
             tile.appendChild(probe);
@@ -782,12 +797,12 @@ defaultPos: { right: 20, bottom: 20 }
             overlay.textContent = probe.naturalWidth + "x" + probe.naturalHeight;
             tile.appendChild(overlay);
             tile.onclick = function() {
-              downloadFile(url, getFileName(url));
+              downloadFile(url, name);
             };
             tile.appendChild(createSaveAsButton(function() {
-              downloadFile(url, getFileName(url), true);
+              downloadFile(url, name, true);
             }));
-            state.foundUrls.add({ url, name: getFileName(url) });
+            state.foundUrls.add({ url, name });
             var area = probe.naturalWidth * probe.naturalHeight;
             var index = loadedTiles.length;
             while (index > 0 && loadedTiles[index - 1].area < area) index--;
@@ -1044,31 +1059,45 @@ defaultPos: { right: 20, bottom: 20 }
     }
     return i;
   }
+  var MEDIA_RE = /\.(mp4|webm|mp3|wav|mov|avi|mkv|pdf|zip|rar)$/i;
+  var pathOf = function(url) {
+    try {
+      return new URL(url).pathname;
+    } catch (ignore) {
+      return url;
+    }
+  };
+  var extOf = function(url) {
+    var file = pathOf(url).split("/").pop() || "";
+    var dot = file.lastIndexOf(".");
+    return dot > 0 ? file.slice(dot + 1).toUpperCase() : "";
+  };
   async function searchMedia() {
     var resultsContainer = document.getElementById("isf-results-container");
-    var e = new Set(), i = 0;
-    var r = /\.(mp4|webm|mp3|wav|mov|avi|mkv|pdf|zip|rar)$/i;
-    var o = function(rawUrl, tagName) {
-      var n = resolveUrl(rawUrl);
-      if (!n || e.has(n)) return;
-      e.add(n);
-      state.foundUrls.add({ url: n, name: getFileName(n) });
-      i++;
+    var seen = new Set();
+    var count = 0;
+    var addRow = function(rawUrl, metaText) {
+      var url = resolveUrl(rawUrl);
+      if (!url || seen.has(url)) return;
+      if (0 === url.indexOf("blob:")) return;
+      seen.add(url);
+      state.foundUrls.add({ url, name: getFileName(url) });
+      count++;
       var row = document.createElement("div");
       row.className = "isf-list-item";
       var name = document.createElement("span");
       name.className = "isf-item-name";
-      name.textContent = getFileName(n);
+      name.textContent = getFileName(url);
       var meta = document.createElement("span");
       meta.className = "isf-item-meta";
-      meta.textContent = tagName;
+      meta.textContent = metaText;
       var actions = document.createElement("span");
       actions.className = "isf-item-actions";
       actions.appendChild(createSaveAsButton(function() {
-        downloadFile(n, getFileName(n), true);
+        downloadFile(url, getFileName(url), true);
       }));
       row.onclick = function() {
-        downloadFile(n, getFileName(n));
+        downloadFile(url, getFileName(url));
       };
       row.appendChild(name);
       row.appendChild(meta);
@@ -1076,17 +1105,17 @@ defaultPos: { right: 20, bottom: 20 }
       resultsContainer.appendChild(row);
     };
     document.querySelectorAll("video, audio").forEach(function(el) {
-      if (el.src) o(el.src, el.tagName);
-      el.querySelectorAll("source").forEach(function(t) {
-        o(t.src, el.tagName);
+      if (el.src) addRow(el.src, el.tagName);
+      el.querySelectorAll("source").forEach(function(source) {
+        addRow(source.src, el.tagName);
       });
     });
     document.querySelectorAll("a").forEach(function(a) {
-      if (a.href && r.test(a.href)) {
-        o(a.href, a.href.split(".").pop().toUpperCase());
+      if (a.href && MEDIA_RE.test(pathOf(a.href))) {
+        addRow(a.href, extOf(a.href));
       }
     });
-    return i;
+    return count;
   }
   var CATEGORY_LABELS = {
     images: "Картинки",
