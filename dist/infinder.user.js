@@ -1,21 +1,23 @@
 // ==UserScript==
-// @name         Infinder
-// @namespace    https://github.com/Vildaevc/Infinder
-// @version      2.7.1
-// @author       Vildaevc
-// @description  Поиск изображений, SVG, шрифтов, цветов и медиа на любой странице.
-// @license      MIT
-// @homepage     https://github.com/Vildaevc/Infinder#readme
-// @homepageURL  https://github.com/Vildaevc/Infinder
-// @source       https://github.com/Vildaevc/Infinder.git
-// @supportURL   https://github.com/Vildaevc/Infinder/issues
-// @downloadURL  https://raw.githubusercontent.com/Vildaevc/Infinder/main/dist/infinder.user.js
-// @updateURL    https://raw.githubusercontent.com/Vildaevc/Infinder/main/dist/infinder.user.js
-// @match        *://*/*
-// @grant        GM_addStyle
-// @grant        GM_download
-// @grant        GM_setClipboard
-// @run-at       document-end
+// @name            Infinder
+// @namespace       https://github.com/Vildaevc/Infinder
+// @version         2.8.0
+// @author          Vildaevc
+// @description     Userscript: find and download images, SVG, fonts, colors and media on any page
+// @description:en  Find and download images, SVG, fonts, colors and media on any page.
+// @description:ru  Поиск и скачивание изображений, SVG, шрифтов, цветов и медиа на любой странице.
+// @license         MIT
+// @homepage        https://github.com/Vildaevc/Infinder#readme
+// @homepageURL     https://github.com/Vildaevc/Infinder
+// @source          https://github.com/Vildaevc/Infinder.git
+// @supportURL      https://github.com/Vildaevc/Infinder/issues
+// @downloadURL     https://raw.githubusercontent.com/Vildaevc/Infinder/main/dist/infinder.user.js
+// @updateURL       https://raw.githubusercontent.com/Vildaevc/Infinder/main/dist/infinder.user.js
+// @match           *://*/*
+// @grant           GM_addStyle
+// @grant           GM_download
+// @grant           GM_setClipboard
+// @run-at          document-end
 // @noframes
 // ==/UserScript==
 
@@ -524,14 +526,92 @@ defaultPos: { right: 20, bottom: 20 }
         box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
     }
 `;
+  var STRINGS = {
+    en: {
+      widgetTitle: "Infinder (drag me)",
+      close: "Close",
+      cat_images: "Images",
+      cat_svg: "SVG",
+      cat_colors: "Colors",
+      cat_fonts: "Fonts",
+      cat_media: "Media",
+      emptyState: "Pick a category to start searching",
+      statusIdle: "Waiting...",
+      statusScanning: "Scanning...",
+      statusFound: "Found: {n}",
+      statusError: "Search failed",
+      notFound_images: "No images found",
+      notFound_svg: "No SVG found",
+      notFound_colors: "No colors found",
+      notFound_fonts: "No fonts found",
+      notFound_media: "No media found",
+      notFound_generic: "Nothing found",
+      downloadAll: "Download all",
+      downloadAllCount: "Download all ({n})",
+      confirmDownload: "Download {n} files?",
+      saveAs: "Save as...",
+      copied: "Copied: {value}",
+      copyFailed: "Couldn't copy",
+      clipboardUnavailable: "Clipboard is unavailable",
+      imageFailed: "Couldn't load: {url}"
+    },
+    ru: {
+      widgetTitle: "Infinder (перетащи меня)",
+      close: "Закрыть",
+      cat_images: "Картинки",
+      cat_svg: "SVG",
+      cat_colors: "Цвета",
+      cat_fonts: "Шрифты",
+      cat_media: "Медиа",
+      emptyState: "Выберите категорию для поиска",
+      statusIdle: "Ожидание...",
+      statusScanning: "Сканирование...",
+      statusFound: "Найдено: {n}",
+      statusError: "Ошибка поиска",
+      notFound_images: "Картинки не найдены",
+      notFound_svg: "SVG не найдены",
+      notFound_colors: "Цвета не найдены",
+      notFound_fonts: "Шрифты не найдены",
+      notFound_media: "Медиа не найдены",
+      notFound_generic: "Ничего не найдено",
+      downloadAll: "Скачать все",
+      downloadAllCount: "Скачать все ({n})",
+      confirmDownload: "Скачать {n} файлов?",
+      saveAs: "Сохранить как...",
+      copied: "Скопировано: {value}",
+      copyFailed: "Не удалось скопировать",
+      clipboardUnavailable: "Буфер обмена недоступен",
+      imageFailed: "Не удалось загрузить: {url}"
+    }
+  };
+  var locale = (function() {
+    var language = (navigator.language || "en").toLowerCase();
+    return 0 === language.indexOf("ru") ? "ru" : "en";
+  })();
+  function getLocale() {
+    return locale;
+  }
+  function t(key, params) {
+    var table = STRINGS[locale] || STRINGS.en;
+    var text = table[key];
+    if (void 0 === text) text = STRINGS.en[key];
+    if (void 0 === text) return key;
+    if (params) {
+      Object.keys(params).forEach(function(name) {
+        text = text.split("{" + name + "}").join(params[name]);
+      });
+    }
+    return text;
+  }
   function createWidget() {
     _GM_addStyle(styles);
     var root = document.createElement("div");
     root.id = "isf-root";
+    root.setAttribute("lang", getLocale());
     document.body.appendChild(root);
     var button = document.createElement("div");
     button.id = "isf-main-button";
-    button.title = "Infinder (Drag me)";
+    button.title = t("widgetTitle");
     button.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>';
     root.appendChild(button);
     var popup = document.createElement("div");
@@ -543,7 +623,7 @@ defaultPos: { right: 20, bottom: 20 }
                 <span>Infinder</span>
             </div>
             <div class="isf-header-actions">
-                <button class="isf-close" id="isf-close-btn" title="Закрыть">
+                <button class="isf-close" id="isf-close-btn" title="${t("close")}" aria-label="${t("close")}">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                 </button>
             </div>
@@ -551,34 +631,34 @@ defaultPos: { right: 20, bottom: 20 }
         <div class="isf-controls">
             <button class="isf-btn" data-action="images">
                 <svg class="isf-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-                <span class="isf-btn-label">Картинки</span>
+                <span class="isf-btn-label">${t("cat_images")}</span>
             </button>
             <button class="isf-btn" data-action="svg">
                 <svg class="isf-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
-                <span class="isf-btn-label">SVG</span>
+                <span class="isf-btn-label">${t("cat_svg")}</span>
             </button>
             <button class="isf-btn" data-action="colors">
                 <svg class="isf-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><line x1="4.93" y1="4.93" x2="9.17" y2="9.17"/><line x1="14.83" y1="14.83" x2="19.07" y2="19.07"/><line x1="14.83" y1="9.17" x2="19.07" y2="4.93"/><line x1="4.93" y1="19.07" x2="9.17" y2="14.83"/></svg>
-                <span class="isf-btn-label">Цвета</span>
+                <span class="isf-btn-label">${t("cat_colors")}</span>
             </button>
             <button class="isf-btn" data-action="fonts">
                 <svg class="isf-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
-                <span class="isf-btn-label">Шрифты</span>
+                <span class="isf-btn-label">${t("cat_fonts")}</span>
             </button>
             <button class="isf-btn" data-action="media">
                 <svg class="isf-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
-                <span class="isf-btn-label">Медиа</span>
+                <span class="isf-btn-label">${t("cat_media")}</span>
             </button>
         </div>
         <div id="isf-results-container">
             <div class="isf-empty-state">
                 <svg class="isf-empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                <span>Выберите категорию для поиска</span>
+                <span>${t("emptyState")}</span>
             </div>
         </div>
         <div class="isf-footer">
-            <span id="isf-status">Ожидание...</span>
-            <span class="isf-dl-btn" id="isf-dl-all">Скачать все</span>
+            <span id="isf-status">${t("statusIdle")}</span>
+            <span class="isf-dl-btn" id="isf-dl-all">${t("downloadAll")}</span>
         </div>
     `;
     root.appendChild(popup);
@@ -700,7 +780,7 @@ defaultPos: { right: 20, bottom: 20 }
     fetch(url, { credentials: "omit" }).then(function(response) {
       if (!response.ok) throw new Error("HTTP " + response.status);
       var length = parseInt(response.headers.get("content-length") || "0", 10);
-      if (length && length > MAX_BLOB_SIZE) throw new Error("файл слишком большой");
+      if (length && length > MAX_BLOB_SIZE) throw new Error("file is too large");
       return response.blob();
     }).then(function(blob) {
       anchorDownload(URL.createObjectURL(blob), name, true);
@@ -719,8 +799,8 @@ defaultPos: { right: 20, bottom: 20 }
     var btn = document.createElement("button");
     btn.type = "button";
     btn.className = "isf-save-as";
-    btn.title = "Сохранить как...";
-    btn.setAttribute("aria-label", "Сохранить как...");
+    btn.title = t("saveAs");
+    btn.setAttribute("aria-label", t("saveAs"));
     btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>';
     btn.addEventListener("click", function(evt) {
       evt.preventDefault();
@@ -732,7 +812,7 @@ defaultPos: { right: 20, bottom: 20 }
   function resolveUrl(e) {
     try {
       return new URL(e, document.baseURI).href;
-    } catch (t) {
+    } catch (t2) {
       return null;
     }
   }
@@ -740,7 +820,7 @@ defaultPos: { right: 20, bottom: 20 }
     try {
       if (e.startsWith("data:")) return "file";
       return new URL(e).pathname.split("/").pop() || "file";
-    } catch (t) {
+    } catch (t2) {
       return "file";
     }
   }
@@ -842,7 +922,7 @@ defaultPos: { right: 20, bottom: 20 }
     var addBrokenTile = function(url) {
       var tile = document.createElement("div");
       tile.className = "isf-grid-item isf-broken";
-      tile.title = "Не удалось загрузить: " + url;
+      tile.title = t("imageFailed", { url });
       tile.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="1" y1="1" x2="23" y2="23"/><path d="M10.41 2h3.18a2 2 0 0 1 1.42.59l1.4 1.4a2 2 0 0 0 1.41.59H21a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2.59a2 2 0 0 0 1.41-.59l1.4-1.4A2 2 0 0 1 9.59 2z"/></svg>';
       resultsContainer.appendChild(tile);
     };
@@ -1052,21 +1132,21 @@ defaultPos: { right: 20, bottom: 20 }
         try {
           if (typeof _GM_setClipboard !== "undefined") {
             _GM_setClipboard(key);
-            showToast("Скопировано: " + key);
+            showToast(t("copied", { value: key }));
           } else if (navigator.clipboard && navigator.clipboard.writeText) {
             navigator.clipboard.writeText(key).then(
               function() {
-                showToast("Скопировано: " + key);
+                showToast(t("copied", { value: key }));
               },
               function() {
-                showToast("Не удалось скопировать");
+                showToast(t("copyFailed"));
               }
             );
           } else {
-            showToast("Буфер обмена недоступен");
+            showToast(t("clipboardUnavailable"));
           }
         } catch (err) {
-          showToast("Не удалось скопировать");
+          showToast(t("copyFailed"));
         }
       };
       resultsContainer.appendChild(chip);
@@ -1192,13 +1272,6 @@ defaultPos: { right: 20, bottom: 20 }
     });
     return count;
   }
-  var CATEGORY_LABELS = {
-    images: "Картинки",
-    svg: "SVG",
-    colors: "Цвета",
-    fonts: "Шрифты",
-    media: "Медиа"
-  };
   var LOADER_HTML = '<div class="isf-loading"><span class="isf-spinner"></span></div>';
   async function searchDispatcher(action) {
     var resultsContainer = document.getElementById("isf-results-container");
@@ -1208,7 +1281,7 @@ defaultPos: { right: 20, bottom: 20 }
     state.isSearching = true;
     resultsContainer.innerHTML = LOADER_HTML;
     state.foundUrls.clear();
-    statusEl.textContent = "Сканирование...";
+    statusEl.textContent = t("statusScanning");
     dlAllBtn.style.display = "none";
     await new Promise(function(resolve) {
       setTimeout(resolve, 50);
@@ -1221,14 +1294,14 @@ defaultPos: { right: 20, bottom: 20 }
       else if ("colors" === action) count = await searchColors();
       else if ("fonts" === action) count = await searchFonts();
       else if ("media" === action) count = await searchMedia();
-      statusEl.textContent = "Найдено: " + count;
+      statusEl.textContent = t("statusFound", { n: count });
       if ("colors" !== action && count > 0) {
         dlAllBtn.style.display = "block";
-        dlAllBtn.textContent = "Скачать все (" + count + ")";
+        dlAllBtn.textContent = t("downloadAllCount", { n: count });
         dlAllBtn.onclick = function() {
           var files = Array.from(state.foundUrls);
           if (!files.length) return;
-          if (!confirm("Скачать " + files.length + " файлов?")) return;
+          if (!confirm(t("confirmDownload", { n: files.length }))) return;
           files.forEach(function(item, index) {
             setTimeout(function() {
               downloadFile(item.url, item.name);
@@ -1239,7 +1312,7 @@ defaultPos: { right: 20, bottom: 20 }
     } catch (err) {
       failed = true;
       console.error(err);
-      statusEl.textContent = "Ошибка поиска";
+      statusEl.textContent = t("statusError");
       dlAllBtn.style.display = "none";
     } finally {
       state.isSearching = false;
@@ -1247,8 +1320,10 @@ defaultPos: { right: 20, bottom: 20 }
       if (loading) loading.remove();
     }
     if (!failed && 0 === count) {
-      var label = CATEGORY_LABELS[action] || "Элементы";
-      resultsContainer.innerHTML = '<div class="isf-empty-msg">' + label + " не найдены</div>";
+      var key = "notFound_" + action;
+      var message = t(key);
+      if (message === key) message = t("notFound_generic");
+      resultsContainer.innerHTML = '<div class="isf-empty-msg">' + message + "</div>";
     }
   }
   (function() {

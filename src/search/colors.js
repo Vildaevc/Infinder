@@ -1,6 +1,7 @@
 // Поиск цветов на странице
 import { GM_setClipboard } from '$';
 import { scanPageElements } from '../scan.js';
+import { t } from '../i18n.js';
 
 // Нормализация цвета в #rrggbb (непрозрачный) или #rrggbbaa (с альфой).
 // hex разбирается напрямую; всё остальное (rgb/rgba/hsl/hsla/имена)
@@ -103,17 +104,17 @@ export async function searchColors() {
             try {
                 if (typeof GM_setClipboard !== "undefined") {
                     GM_setClipboard(key);
-                    showToast("Скопировано: " + key);
+                    showToast(t("copied", { value: key }));
                 } else if (navigator.clipboard && navigator.clipboard.writeText) {
                     navigator.clipboard.writeText(key).then(
-                        function () { showToast("Скопировано: " + key); },
-                        function () { showToast("Не удалось скопировать"); }
+                        function () { showToast(t("copied", { value: key })); },
+                        function () { showToast(t("copyFailed")); }
                     );
                 } else {
-                    showToast("Буфер обмена недоступен");
+                    showToast(t("clipboardUnavailable"));
                 }
             } catch (err) {
-                showToast("Не удалось скопировать");
+                showToast(t("copyFailed"));
             }
         };
         resultsContainer.appendChild(chip);

@@ -3,6 +3,7 @@ import { state } from '../state.js';
 import { resolveUrl, getFileName } from '../utils.js';
 import { downloadFile, createSaveAsButton } from '../download.js';
 import { scanPageElements } from '../scan.js';
+import { t } from '../i18n.js';
 
 // Одновременно грузим не более BATCH кандидатов (не «вешаем» тяжёлые страницы)
 var BATCH = 16;
@@ -102,7 +103,7 @@ export async function searchImages() {
     var addBrokenTile = function (url) {
         var tile = document.createElement("div");
         tile.className = "isf-grid-item isf-broken";
-        tile.title = "Не удалось загрузить: " + url;
+        tile.title = t("imageFailed", { url: url });
         tile.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="1" y1="1" x2="23" y2="23"/><path d="M10.41 2h3.18a2 2 0 0 1 1.42.59l1.4 1.4a2 2 0 0 0 1.41.59H21a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2.59a2 2 0 0 0 1.41-.59l1.4-1.4A2 2 0 0 1 9.59 2z"/></svg>';
         resultsContainer.appendChild(tile);
     };

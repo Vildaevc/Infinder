@@ -1,20 +1,12 @@
 // Диспетчер поиска
 import { state } from '../state.js';
 import { downloadFile } from '../download.js';
+import { t } from '../i18n.js';
 import { searchImages } from './images.js';
 import { searchSvg } from './svg.js';
 import { searchColors } from './colors.js';
 import { searchFonts } from './fonts.js';
 import { searchMedia } from './media.js';
-
-// Названия категорий для пустых состояний
-var CATEGORY_LABELS = {
-    images: "Картинки",
-    svg: "SVG",
-    colors: "Цвета",
-    fonts: "Шрифты",
-    media: "Медиа"
-};
 
 var LOADER_HTML = '<div class="isf-loading"><span class="isf-spinner"></span></div>';
 
@@ -26,7 +18,7 @@ export async function searchDispatcher(action) {
     state.isSearching = true;
     resultsContainer.innerHTML = LOADER_HTML; // спиннер на время поиска
     state.foundUrls.clear();
-    statusEl.textContent = "Сканирование...";
+    statusEl.textContent = t("statusScanning");
     dlAllBtn.style.display = "none";
 
     // Даём браузеру отрисовать спиннер до начала сканирования
@@ -42,16 +34,16 @@ export async function searchDispatcher(action) {
         else if ("fonts" === action) count = await searchFonts();
         else if ("media" === action) count = await searchMedia();
 
-        statusEl.textContent = "Найдено: " + count;
+        statusEl.textContent = t("statusFound", { n: count });
 
         if ("colors" !== action && count > 0) {
             dlAllBtn.style.display = "block";
-            dlAllBtn.textContent = "Скачать все (" + count + ")";
+            dlAllBtn.textContent = t("downloadAllCount", { n: count });
             dlAllBtn.onclick = function () {
                 // Все записи foundUrls — {url, name} (единый формат, Фаза 2.2)
                 var files = Array.from(state.foundUrls);
                 if (!files.length) return;
-                if (!confirm("Скачать " + files.length + " файлов?")) return;
+                if (!confirm(t("confirmDownload", { n: files.length }))) return;
                 files.forEach(function (item, index) {
                     setTimeout(function () {
                         downloadFile(item.url, item.name);
@@ -62,7 +54,7 @@ export async function searchDispatcher(action) {
     } catch (err) {
         failed = true;
         console.error(err);
-        statusEl.textContent = "Ошибка поиска";
+        statusEl.textContent = t("statusError");
         dlAllBtn.style.display = "none";
     } finally {
         state.isSearching = false;
@@ -71,9 +63,11 @@ export async function searchDispatcher(action) {
     }
 
     // Пустое состояние показываем только в успешной ветке,
-    // чтобы не затирать «Ошибка поиска».
+    // чтобы не затирать сообщение об ошибке.
     if (!failed && 0 === count) {
-        var label = CATEGORY_LABELS[action] || "Элементы";
-        resultsContainer.innerHTML = '<div class="isf-empty-msg">' + label + ' не найдены</div>';
+        var key = "notFound_" + action;
+        var message = t(key);
+        if (message === key) message = t("notFound_generic");
+        resultsContainer.innerHTML = '<div class="isf-empty-msg">' + message + '</div>';
     }
 }

@@ -1,161 +1,177 @@
 # Infinder
 
-**Infinder** — userscript (скрипт для браузера), который добавляет на любую страницу плавающую кнопку-«лупу» и помогает находить и скачивать медиа-ресурсы сайта: картинки, SVG, шрифты, цвета и медиафайлы.
+**English** · [Русский](README.ru.md)
 
-Работает в **TamperMonkey**, **OrangeMonkey** и **Violentmonkey** (Chrome / Edge / Firefox / Opera и другие браузеры на Chromium).
+**Infinder** is a browser userscript that adds a floating magnifier button to any page and helps you find and download its media: images, SVG, fonts, colors and media files.
 
-- Автор: **Vildaevc** — https://github.com/Vildaevc
-- Лицензия: **MIT** (см. [LICENSE.md](LICENSE.md))
-- Текущая версия: **2.7.0**
+Works with **Tampermonkey**, **OrangeMonkey** and **Violentmonkey** (Chrome / Edge / Firefox / Opera and other Chromium browsers).
+
+- Author: **Vildaevc** — https://github.com/Vildaevc
+- License: **MIT** (see [LICENSE.md](LICENSE.md))
+- Current version: **2.8.0**
+- Widget language: **English by default**, automatically switches to **Russian** for `ru` browser locales
 
 ---
 
-## 🚀 Быстрый старт — просто использовать (без сборки)
+## 🚀 Quick start — just use it (no build required)
 
-Нужен только готовый файл скрипта — никаких Node.js и терминала.
+You only need the ready-made script file — no Node.js or terminal.
 
-1. **Установите менеджер скриптов** (если ещё нет):
-   - Chrome / Edge / Opera: [TamperMonkey](https://www.tampermonkey.net/) или [OrangeMonkey](https://www.orangemonkey.com/)
-   - Firefox: [TamperMonkey](https://addons.mozilla.org/firefox/addon/tampermonkey/) или [Violentmonkey](https://addons.mozilla.org/firefox/addon/violentmonkey/)
-2. **Установите Infinder** одним из способов:
+1. **Install a userscript manager** (if you don't have one):
+   - Chrome / Edge / Opera: [Tampermonkey](https://www.tampermonkey.net/) or [OrangeMonkey](https://www.orangemonkey.com/)
+   - Firefox: [Tampermonkey](https://addons.mozilla.org/firefox/addon/tampermonkey/) or [Violentmonkey](https://addons.mozilla.org/firefox/addon/violentmonkey/)
+2. **Install Infinder**, either way:
 
-   **Способ А — по ссылке (рекомендуется):**
+   **Option A — by link (recommended):**
    👉 [`https://raw.githubusercontent.com/Vildaevc/Infinder/main/dist/infinder.user.js`](https://raw.githubusercontent.com/Vildaevc/Infinder/main/dist/infinder.user.js)
 
-   TamperMonkey/OrangeMonkey распознаёт `.user.js` в адресе и предложит установку. Если ссылка открылась как текст — скопируйте содержимое и вставьте в новый скрипт (см. способ Б).
+   Tampermonkey/OrangeMonkey detects `.user.js` in the URL and offers to install. If the link opens as plain text, copy the content and paste it into a new script (Option B).
 
-   **Способ Б — из файла:**
-   1. Скачайте файл [`dist/infinder.user.js`](dist/infinder.user.js) (кнопка **Raw** / «Скачать»).
-   2. TamperMonkey → **Панель управления → Утилиты → Импорт из файла**.
-   3. Либо создайте новый скрипт и вставьте содержимое файла целиком.
+   **Option B — from the file:**
+   1. Download [`dist/infinder.user.js`](dist/infinder.user.js) (the **Raw** / "Download" button).
+   2. Tampermonkey → **Dashboard → Utilities → Import from file**.
+   3. Or create a new script and paste the whole file content.
 
-3. Откройте любую страницу — справа снизу появится круглая кнопка-лупа. Клик — открыть окно, клик по кнопке категории — поиск.
+   You can also grab the packaged file from [GitHub Releases](https://github.com/Vildaevc/Infinder/releases/latest).
 
-> **Авто-обновление:** в метаданных прописаны `@updateURL`/`@downloadURL` на ветку `main`, поэтому менеджер сам предложит обновление после выхода новой версии.
+3. Open any page — a round magnifier button appears in the bottom-right corner. Click it to open the panel, then click a category to start searching.
+
+> **Auto-updates:** the metadata contains `@updateURL`/`@downloadURL` pointing to `main`, so your userscript manager will offer new versions automatically.
 
 ---
 
-## 🛠 Для разработчиков — собрать самому (npm)
+## 🛠 For developers — build it yourself (npm)
 
-Требуется **Node.js ≥ 20** и npm.
+Requires **Node.js ≥ 20** and npm.
 
 ```bash
 git clone https://github.com/Vildaevc/Infinder.git
 cd Infinder
-npm install        # установка dev-зависимостей (vite, vite-plugin-monkey, eslint)
-npm run lint       # проверка кода линтером (ESLint + контракты проекта)
-npm run build      # production-сборка -> dist/infinder.user.js
-npm run check      # смоук-тест: сборка + проверка метаданных userscript
+npm install        # dev dependencies (vite, vite-plugin-monkey, eslint)
+npm run lint       # ESLint + project contracts
+npm run build      # production build -> dist/infinder.user.js
+npm run check      # smoke test: build + userscript metadata validation
 ```
 
-Готовый файл появится в `dist/infinder.user.js` — устанавливается так же, как в разделе выше (импорт из файла).
+The built file appears at `dist/infinder.user.js` — install it the same way as above (import from file).
 
-### Режим разработки с авто-перезагрузкой
+### Development mode with hot reload
 
 ```bash
-npm run dev        # dev-сервер vite-plugin-monkey
+npm run dev        # vite-plugin-monkey dev server
 ```
 
-Создайте в менеджере скрипт-обёртку с `@require` на адрес dev-сервера (точный URL печатает сам сервер, обычно `http://localhost:3000/infinder.user.js`) — правки в `src/` будут подхватываться автоматически.
+Create a wrapper script in your manager with `@require` pointing to the dev server URL (the exact URL is printed by the server, usually `http://localhost:3000/infinder.user.js`) — edits in `src/` are picked up automatically.
 
-### Команды
+### Commands
 
-| Команда | Что делает |
+| Command | What it does |
 |---|---|
-| `npm install` | Установка зависимостей |
-| `npm run dev` | Dev-сервер с горячей перезагрузкой |
-| `npm run lint` | ESLint + проверка контрактов проекта (скрипт не минифицируется) |
-| `npm run build` | Сборка `dist/infinder.user.js` |
-| `npm run check` / `npm test` | Сборка + проверка метаданных (падает при поломке) |
+| `npm install` | Install dependencies |
+| `npm run dev` | Dev server with hot reload |
+| `npm run lint` | ESLint + project contract checks |
+| `npm run build` | Build `dist/infinder.user.js` |
+| `npm run check` / `npm test` | Build + metadata validation (fails on a broken build) |
 
-**Важно:** `dist/infinder.user.js` хранится в репозитории (чтобы работала ссылка «просто использовать»). После правок в `src/` обязательно выполните `npm run build` (или `npm run check`) и закоммитьте обновлённый `dist/` — CI проверяет, что сборка соответствует исходникам.
+**Important:** `dist/infinder.user.js` is committed to the repository (that is what the "just use it" link and `@updateURL` rely on). After changing anything in `src/`, run `npm run build` (or `npm run check`) and commit the updated `dist/` — CI verifies that the committed build matches the sources.
 
 ---
 
-## Возможности
+## Features
 
-| Категория | Что находит |
+| Category | What it finds |
 |---|---|
-| **Картинки** | Все `<img>` (включая `srcset`) и фоновые изображения (`background-image`, в том числе многослойные). Плитки отсортированы **по разрешению — от больших к меньшим**; не загрузившиеся картинки показаны заглушкой |
-| **SVG** | Inline-`<svg>` (дубли отбрасываются по полной сериализации) и внешние `img[src$=".svg"]` (регистр расширения не важен) |
-| **Цвета** | Цвета страницы из `color`/`backgroundColor`, сгруппированы по частоте; поддерживаются все форматы (rgb/rgba/hsl/имена), у полупрозрачных сохраняется альфа (`#rrggbbaa`); клик — копирование HEX |
-| **Шрифты** | `@font-face` из таблиц стилей страницы: превью и скачивание файла шрифта |
-| **Медиа** | `<video>/<audio>/<source>` и ссылки на `mp4/webm/mp3/wav/mov/avi/mkv/pdf/zip/rar` |
+| **Images** | Every `<img>` (including `srcset`) and CSS background images (`background-image`, including multi-layer ones). Tiles are **sorted by resolution, largest first**; images that fail to load are shown as placeholders |
+| **SVG** | Inline `<svg>` (duplicates dropped by full serialization) and external `img[src$=".svg"]` (extension case-insensitive) |
+| **Colors** | Page colors from `color`/`backgroundColor`, grouped by frequency; all formats supported (rgb/rgba/hsl/named), alpha preserved for translucent ones (`#rrggbbaa`); click copies the HEX |
+| **Fonts** | `@font-face` rules from page stylesheets: preview and font file download |
+| **Media** | `<video>`/`<audio>`/`<source>` elements and links to `mp4/webm/mp3/wav/mov/avi/mkv/pdf/zip/rar` |
 
-Дополнительно:
+Also:
 
-- **Клик по элементу результата** — быстрая загрузка в папку загрузок браузера;
-- **Кнопка с дискетой** на каждом элементе — системный диалог **«Сохранить как...»**;
-- **«Скачать все»** — пакетное скачивание всех найденных файлов (пауза 0.5 с между файлами);
-- спиннер во время поиска и понятные пустые состояния по категориям;
-- плавающая кнопка и окно перетаскиваются, позиция кнопки запоминается;
-- тёмная glassmorphism-тема, полностью изолированная от стилей сайта;
-- надёжная работа без внешних CDN, защита от сбоев `localStorage`.
+- **Click an item** — quick download into the browser's downloads folder;
+- **Floppy-disk button** on every item — system **"Save as…"** dialog;
+- **"Download all"** — batch download of every found file (0.5 s pause between files);
+- spinner while scanning and clear per-category empty states;
+- the button and the panel are draggable (mouse, touch, stylus) and the button position is remembered;
+- dark glassmorphism theme, fully isolated from the host page styles;
+- no external CDN dependencies, safe against broken/unavailable `localStorage`.
 
-### Совместимость менеджеров скриптов
+### Userscript manager compatibility
 
-| Менеджер | Статус | Примечание |
+| Manager | Status | Notes |
 |---|---|---|
-| TamperMonkey | ✅ Полная поддержка | `GM_download` — фоновая загрузка, диалог «Сохранить как...» |
-| Violentmonkey | ✅ Полная поддержка | То же |
-| OrangeMonkey | ✅ Поддержка с фолбэком | `GM_download` недоступен: файл скачивается через ссылку/Blob, диалог «Сохранить как...» определяется настройками браузера |
+| Tampermonkey | ✅ Full support | `GM_download` — background downloads, "Save as…" dialog |
+| Violentmonkey | ✅ Full support | Same |
+| OrangeMonkey | ✅ Supported via fallback | `GM_download` is unavailable: files are downloaded via link/Blob, and the "Save as…" dialog depends on browser settings |
+
+### Interface language
+
+The widget ships with two locales:
+
+- **English** — used by default for any browser language;
+- **Russian** — enabled automatically when `navigator.language` starts with `ru`.
+
+Detection happens once at startup; the `@description:en` / `@description:ru` metadata lines let the manager localize the script entry as well. All UI strings live in [`src/i18n.js`](src/i18n.js) — see the contribution rules in [AGENTS.md](AGENTS.md).
 
 ---
 
-## Архитектура
+## Architecture
 
 ```
 src/
-├── main.js               # Точка входа: виджет, восстановление позиции, обработчики
-├── config.js             # Конфигурация: размеры, z-index, ширина попапа, цвета, позиция
-├── state.js              # Состояние: isSearching, foundUrls (Set из {url, name})
+├── main.js               # Entry point: widget, position restore, event handlers
+├── config.js             # Configuration: sizes, z-index, popup width, colors, default position
+├── state.js              # Shared state: isSearching, foundUrls (Set of {url, name})
+├── i18n.js               # UI localization (en base, ru translation, auto-detect)
 ├── utils.js              # resolveUrl(), getFileName()
-├── download.js           # downloadFile() (GM_download + фолбэк) и createSaveAsButton()
-├── scan.js               # Пошаговый обход элементов страницы (для тяжёлых парсеров)
-├── dom.js                # createWidget(): разметка виджета + инжект стилей
-├── drag.js               # makeDraggable(): перетаскивание кнопки и окна
-├── styles.js             # CSS темы (изоляция под #isf-root)
+├── download.js           # downloadFile() (GM_download + fallback) and createSaveAsButton()
+├── scan.js               # Chunked DOM walker for heavy parsers
+├── dom.js                # createWidget(): widget markup + style injection
+├── drag.js               # makeDraggable(): pointer-events based dragging
+├── styles.js             # Theme CSS (isolated under #isf-root)
 └── search/
-    ├── index.js          # searchDispatcher(): диспетчер, «Скачать все», лоадер
-    ├── images.js         # Картинки (сортировка по разрешению, заглушки битых)
-    ├── svg.js            # Inline и внешние SVG
-    ├── colors.js         # Цвета (canvas-нормализация, альфа)
+    ├── index.js          # searchDispatcher(): dispatcher, "Download all", loader
+    ├── images.js         # Images (resolution sorting, broken-image placeholders)
+    ├── svg.js            # Inline and external SVG
+    ├── colors.js         # Colors (canvas normalization, alpha)
     ├── fonts.js          # @font-face
-    └── media.js          # Видео/аудио/файлы
+    └── media.js          # Video/audio/files
 ```
 
-**Поток работы**
+**Data flow**
 
-1. `main.js` создаёт виджет (`createWidget()`) и навешивает обработчики.
-2. Клик по кнопке категории → `searchDispatcher(action)`.
-3. Диспетчер показывает спиннер, очищает результаты и вызывает нужный парсер.
-4. Парсер наполняет `state.foundUrls` записями `{url, name}` и строит плитки/строки в DOM.
-5. Клик по элементу → `downloadFile(url, name)`; «Скачать все» — те же записи с задержкой.
+1. `main.js` builds the widget (`createWidget()`) and wires up the handlers.
+2. Clicking a category button calls `searchDispatcher(action)`.
+3. The dispatcher shows a spinner, clears previous results and runs the parser.
+4. The parser fills `state.foundUrls` with `{url, name}` records and renders tiles/rows.
+5. Clicking an item calls `downloadFile(url, name)`; "Download all" replays the same records with a delay.
 
-**Скачивание** унифицировано в `src/download.js`: сначала `GM_download` (не зависит от CORS), затем фолбэк (ссылка для `data:`/`blob:`/same-origin, `fetch → Blob` для кросс-доменных ресурсов с CORS, в крайнем случае — новая вкладка).
+**Downloading** is unified in `src/download.js`: `GM_download` first (CORS-independent), then a fallback (anchor download for `data:`/`blob:`/same-origin URLs, `fetch → Blob` for cross-origin resources with CORS, and opening a new tab as the last resort).
 
-**Конфигурация** (`src/config.js`): `btnSize`, `zIndex`, `toastZIndex`, `popupWidth`, `accentColor`, `defaultPos`.
+**Configuration** (`src/config.js`): `btnSize`, `zIndex`, `toastZIndex`, `popupWidth`, `accentColor`, `defaultPos`.
 
-**Версия** userscript берётся из `package.json` через `vite.config.js` — единый источник.
+**Version** comes from `package.json` via `vite.config.js` — a single source of truth.
 
 ---
 
-## Тестирование
+## Testing
 
-- Автоматически: `npm run lint` (ESLint + контракты проекта) и `npm run check` (сборка и проверка метаданных userscript: имя, версия, `@match`, `@grant`, отсутствие внешних `@require`).
-- Вручную: чек-лист ручного тестирования — в [AGENTS.md](AGENTS.md) (раздел «Чек-лист ручного тестирования»).
+- Automated: `npm run lint` (ESLint + project contracts) and `npm run check` (build and userscript metadata validation: name, version, `@match`, `@grant`, no external `@require`).
+- Manual: the manual testing checklist lives in [AGENTS.md](AGENTS.md).
 
-## Документация репозитория
+## Repository docs
 
-| Файл | Назначение |
+| File | Purpose |
 |---|---|
-| [README.md](README.md) | Этот файл: установка, сборка, возможности |
-| [AGENTS.md](AGENTS.md) | Правила, конвенции разработки и чек-лист тестирования (в том числе для ИИ-агентов) |
-| [CHANGELOG.md](CHANGELOG.md) | История версий |
-| [LICENSE.md](LICENSE.md) | Лицензия MIT |
+| [README.md](README.md) | This file (English) |
+| [README.ru.md](README.ru.md) | Russian translation |
+| [AGENTS.md](AGENTS.md) | Development rules, code contracts and testing checklist |
+| [CHANGELOG.md](CHANGELOG.md) | Version history |
+| [LICENSE.md](LICENSE.md) | MIT license |
 
 ---
 
-## Лицензия
+## License
 
-MIT © [Vildaevc](https://github.com/Vildaevc). Подробности — в [LICENSE.md](LICENSE.md).
+MIT © [Vildaevc](https://github.com/Vildaevc). See [LICENSE.md](LICENSE.md).

@@ -18,7 +18,11 @@ export default defineConfig({
                 name: 'Infinder',
                 namespace: REPO_URL,
                 version: pkg.version,
-                description: 'Поиск изображений, SVG, шрифтов, цветов и медиа на любой странице.',
+                // Локализованные метаданные: менеджер скриптов сам выберет язык
+                description: {
+                    en: 'Find and download images, SVG, fonts, colors and media on any page.',
+                    ru: 'Поиск и скачивание изображений, SVG, шрифтов, цветов и медиа на любой странице.'
+                },
                 author: 'Vildaevc',
                 license: 'MIT',
                 homepageURL: REPO_URL,

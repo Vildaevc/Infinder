@@ -24,8 +24,7 @@ const browserGlobals = {
 };
 
 // Контракты проекта (см. AGENTS.md) — проверяются линтером
-const contractRules = [
-    'error',
+const contracts = [
     {
         selector: 'CallExpression[callee.property.name="querySelectorAll"][arguments.0.value="*"]',
         message: 'Тяжёлый обход DOM: используйте scanPageElements() из src/scan.js'
@@ -39,6 +38,12 @@ const contractRules = [
         message: 'Скачивание только через downloadFile() из src/download.js'
     }
 ];
+
+// Строки интерфейса — только через t() из src/i18n.js (английский — базовый язык)
+const noCyrillicLiterals = {
+    selector: 'Literal[value=/[А-Яа-яЁё]/]',
+    message: 'Строки интерфейса — только через t() из src/i18n.js (см. AGENTS.md)'
+};
 
 export default [
     {
@@ -57,12 +62,17 @@ export default [
             'no-empty': ['error', { allowEmptyCatch: true }],
             'no-console': ['warn', { allow: ['error', 'warn'] }],
             eqeqeq: 'error',
-            'no-restricted-syntax': contractRules
+            'no-restricted-syntax': ['error', ...contracts, noCyrillicLiterals]
         }
     },
     {
         // Единственное место, где разрешён прямой GM_download
         files: ['src/download.js'],
+        rules: { 'no-restricted-syntax': ['error', noCyrillicLiterals] }
+    },
+    {
+        // Здесь и живут переводы — кириллица разрешена
+        files: ['src/i18n.js'],
         rules: { 'no-restricted-syntax': 'off' }
     },
     {
