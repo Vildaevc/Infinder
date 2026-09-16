@@ -7,8 +7,42 @@ import { scanPageElements } from '../scan.js';
 // Одновременно грузим не более BATCH кандидатов (не «вешаем» тяжёлые страницы)
 var BATCH = 16;
 
+// Ленивая загрузка превью: обсервер и карта «плитка -> URL» переиспользуются
+// между поисками, поэтому ссылки на удалённые плитки не накапливаются.
+var previewObserver = null;
+var pendingPreview = new Map();
+
+function resetPreviews() {
+    pendingPreview.clear();
+    if (previewObserver) previewObserver.disconnect();
+}
+
+function observePreview(resultsContainer, img, src) {
+    if (typeof IntersectionObserver === "undefined") {
+        img.src = src;
+        return;
+    }
+    if (!previewObserver) {
+        previewObserver = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                if (!entry.isIntersecting) return;
+                var tile = entry.target;
+                var url = pendingPreview.get(tile);
+                if (url) {
+                    tile.src = url;
+                    pendingPreview.delete(tile);
+                }
+                previewObserver.unobserve(tile);
+            });
+        }, { root: resultsContainer, rootMargin: "200px" });
+    }
+    pendingPreview.set(img, src);
+    previewObserver.observe(img);
+}
+
 export async function searchImages() {
     var resultsContainer = document.getElementById("isf-results-container");
+    resetPreviews();
     var seen = new Set();
     var candidates = [];
 
@@ -85,14 +119,28 @@ export async function searchImages() {
             return new Promise(function (resolve) {
                 var probe = new Image();
                 probe.onload = function () {
+                    var width = probe.naturalWidth;
+                    var height = probe.naturalHeight;
+
+                    // Освобождаем декодированное изображение (оно уже измерено):
+                    // превью подгрузится лениво, когда плитка окажется видимой,
+                    // поэтому память держат только видимые картинки
+                    probe.onload = null;
+                    probe.onerror = null;
+                    probe.src = "";
+
                     var name = nameFor(url);
                     var tile = document.createElement("div");
                     tile.className = "isf-grid-item";
-                    // probe уже загружен — вставляем его без повторного запроса
-                    tile.appendChild(probe);
+                    var preview = document.createElement("img");
+                    preview.alt = "";
+                    preview.decoding = "async";
+                    tile.appendChild(preview);
+                    observePreview(resultsContainer, preview, url);
+
                     var overlay = document.createElement("div");
                     overlay.className = "isf-overlay";
-                    overlay.textContent = probe.naturalWidth + "x" + probe.naturalHeight;
+                    overlay.textContent = width + "x" + height;
                     tile.appendChild(overlay);
                     tile.onclick = function () { downloadFile(url, name); };
                     // Кнопка «Сохранить как...» (диалог) в углу плитки
@@ -102,7 +150,7 @@ export async function searchImages() {
                     state.foundUrls.add({ url: url, name: name });
 
                     // Позиция по убыванию разрешения (сортировка вставками)
-                    var area = probe.naturalWidth * probe.naturalHeight;
+                    var area = width * height;
                     var index = loadedTiles.length;
                     while (index > 0 && loadedTiles[index - 1].area < area) index--;
                     if (index < loadedTiles.length) {

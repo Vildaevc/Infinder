@@ -1,6 +1,5 @@
 // Точка входа Infinder
 import { config } from './config.js';
-import { state } from './state.js';
 import { createWidget } from './dom.js';
 import { makeDraggable } from './drag.js';
 import { searchDispatcher } from './search/index.js';

@@ -42,7 +42,8 @@
 ```bash
 git clone https://github.com/Vildaevc/Infinder.git
 cd Infinder
-npm install        # установка dev-зависимостей (vite, vite-plugin-monkey)
+npm install        # установка dev-зависимостей (vite, vite-plugin-monkey, eslint)
+npm run lint       # проверка кода линтером (ESLint + контракты проекта)
 npm run build      # production-сборка -> dist/infinder.user.js
 npm run check      # смоук-тест: сборка + проверка метаданных userscript
 ```
@@ -63,6 +64,7 @@ npm run dev        # dev-сервер vite-plugin-monkey
 |---|---|
 | `npm install` | Установка зависимостей |
 | `npm run dev` | Dev-сервер с горячей перезагрузкой |
+| `npm run lint` | ESLint + проверка контрактов проекта (скрипт не минифицируется) |
 | `npm run build` | Сборка `dist/infinder.user.js` |
 | `npm run check` / `npm test` | Сборка + проверка метаданных (падает при поломке) |
 
@@ -140,7 +142,7 @@ src/
 
 ## Тестирование
 
-- Автоматически: `npm run check` — собирает проект и проверяет метаданные userscript (имя, версия, `@match`, `@grant`, отсутствие внешних `@require`).
+- Автоматически: `npm run lint` (ESLint + контракты проекта) и `npm run check` (сборка и проверка метаданных userscript: имя, версия, `@match`, `@grant`, отсутствие внешних `@require`).
 - Вручную: чек-лист в [DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md) (раздел «Чек-лист ручного тестирования»).
 - История работ по фазам — в [DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md) (раздел «Статус выполнения»), технический разбор кода — в [Projects_analysis.md](Projects_analysis.md).
 

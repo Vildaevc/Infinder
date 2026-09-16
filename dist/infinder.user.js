@@ -31,10 +31,6 @@ popupWidth: 380,
 toastZIndex: zIndex + 1,
 defaultPos: { right: 20, bottom: 20 }
   };
-  const state = {
-    isSearching: false,
-    foundUrls: new Set()
-  };
   var _GM_addStyle = (() => typeof GM_addStyle != "undefined" ? GM_addStyle : void 0)();
   var _GM_setClipboard = (() => typeof GM_setClipboard != "undefined" ? GM_setClipboard : void 0)();
   const styles = `
@@ -103,6 +99,8 @@ defaultPos: { right: 20, bottom: 20 }
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.15);
         transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
         user-select: none;
+        -webkit-user-select: none;
+        touch-action: none !important;
     }
     #isf-root #isf-main-button:hover {
         box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.25);
@@ -163,6 +161,8 @@ defaultPos: { right: 20, bottom: 20 }
         align-items: center !important;
         cursor: grab;
         user-select: none;
+        -webkit-user-select: none;
+        touch-action: none !important;
         min-height: 48px !important;
     }
     #isf-root .isf-header:active { cursor: grabbing; }
@@ -590,53 +590,83 @@ defaultPos: { right: 20, bottom: 20 }
       toast
     };
   }
-  function makeDraggable(e, t) {
-    let i = false, r, o, n, s;
-    function a(t2) {
-      let a2 = t2.clientX - r, l2 = t2.clientY - o;
-      if (!i && (Math.abs(a2) > 3 || Math.abs(l2) > 3) && (i = true, e.style.cursor = "grabbing"), i) {
-        t2.preventDefault();
-        let d = n + a2, f = s + l2, c = window.innerWidth - e.offsetWidth, p = window.innerHeight - e.offsetHeight;
-        d = Math.max(0, Math.min(d, c)), f = Math.max(0, Math.min(f, p));
-        e.style.left = d + "px";
-        e.style.top = f + "px";
+  function makeDraggable(el, handle) {
+    var dragging = false;
+    var pointerId = null;
+    var startX = 0, startY = 0, originLeft = 0, originTop = 0;
+    function onPointerMove(evt) {
+      if (pointerId !== null && evt.pointerId !== pointerId) return;
+      var dx = evt.clientX - startX;
+      var dy = evt.clientY - startY;
+      if (!dragging && (Math.abs(dx) > 3 || Math.abs(dy) > 3)) {
+        dragging = true;
+        el.style.cursor = "grabbing";
       }
+      if (!dragging) return;
+      evt.preventDefault();
+      var maxLeft = window.innerWidth - el.offsetWidth;
+      var maxTop = window.innerHeight - el.offsetHeight;
+      var left = Math.max(0, Math.min(originLeft + dx, maxLeft));
+      var top = Math.max(0, Math.min(originTop + dy, maxTop));
+      el.style.left = left + "px";
+      el.style.top = top + "px";
     }
-    function l(t2) {
-      document.removeEventListener("mousemove", a);
-      document.removeEventListener("mouseup", l);
-      e.style.cursor = "";
-      if (i) {
-        if ("isf-main-button" === e.id) {
+    function onPointerUp(evt) {
+      if (pointerId !== null && evt.pointerId !== pointerId) return;
+      document.removeEventListener("pointermove", onPointerMove);
+      document.removeEventListener("pointerup", onPointerUp);
+      document.removeEventListener("pointercancel", onPointerUp);
+      el.style.cursor = "";
+      if (pointerId !== null && el.releasePointerCapture) {
+        try {
+          el.releasePointerCapture(pointerId);
+        } catch (ignore) {
+        }
+      }
+      pointerId = null;
+      if (dragging) {
+        if ("isf-main-button" === el.id) {
           try {
-            localStorage.setItem("isf_pos_v3", JSON.stringify({ left: parseInt(e.style.left), top: parseInt(e.style.top) }));
+            localStorage.setItem("isf_pos_v3", JSON.stringify({ left: parseInt(el.style.left), top: parseInt(el.style.top) }));
           } catch (err) {
           }
         }
         setTimeout(function() {
-          i = false;
+          dragging = false;
         }, 50);
       }
     }
-    (t || e).addEventListener("mousedown", function(t2) {
-      if (0 !== t2.button) return;
-      i = false;
-      r = t2.clientX;
-      o = t2.clientY;
-      var d = e.getBoundingClientRect();
-      n = d.left;
-      s = d.top;
-      e.style.right = "auto";
-      e.style.bottom = "auto";
-      e.style.left = n + "px";
-      e.style.top = s + "px";
-      document.addEventListener("mousemove", a);
-      document.addEventListener("mouseup", l);
+    (handle || el).addEventListener("pointerdown", function(evt) {
+      if (0 !== evt.button) return;
+      dragging = false;
+      pointerId = evt.pointerId;
+      startX = evt.clientX;
+      startY = evt.clientY;
+      var rect = el.getBoundingClientRect();
+      originLeft = rect.left;
+      originTop = rect.top;
+      el.style.right = "auto";
+      el.style.bottom = "auto";
+      el.style.left = originLeft + "px";
+      el.style.top = originTop + "px";
+      if (el.setPointerCapture) {
+        try {
+          el.setPointerCapture(evt.pointerId);
+        } catch (ignore) {
+        }
+      }
+      document.addEventListener("pointermove", onPointerMove);
+      document.addEventListener("pointerup", onPointerUp);
+      document.addEventListener("pointercancel", onPointerUp);
     });
-    e.isJustDragged = function() {
-      return i;
+    el.isJustDragged = function() {
+      return dragging;
     };
   }
+  const state = {
+    isSearching: false,
+    foundUrls: new Set()
+  };
   var MAX_BLOB_SIZE = 256 * 1024 * 1024;
   function anchorDownload(href, name, revoke) {
     var link = document.createElement("a");
@@ -724,8 +754,37 @@ defaultPos: { right: 20, bottom: 20 }
     }
   }
   var BATCH = 16;
+  var previewObserver = null;
+  var pendingPreview = new Map();
+  function resetPreviews() {
+    pendingPreview.clear();
+    if (previewObserver) previewObserver.disconnect();
+  }
+  function observePreview(resultsContainer, img, src) {
+    if (typeof IntersectionObserver === "undefined") {
+      img.src = src;
+      return;
+    }
+    if (!previewObserver) {
+      previewObserver = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (!entry.isIntersecting) return;
+          var tile = entry.target;
+          var url = pendingPreview.get(tile);
+          if (url) {
+            tile.src = url;
+            pendingPreview.delete(tile);
+          }
+          previewObserver.unobserve(tile);
+        });
+      }, { root: resultsContainer, rootMargin: "200px" });
+    }
+    pendingPreview.set(img, src);
+    previewObserver.observe(img);
+  }
   async function searchImages() {
     var resultsContainer = document.getElementById("isf-results-container");
+    resetPreviews();
     var seen = new Set();
     var candidates = [];
     var collect = function(rawUrl) {
@@ -788,13 +847,22 @@ defaultPos: { right: 20, bottom: 20 }
         return new Promise(function(resolve) {
           var probe = new Image();
           probe.onload = function() {
+            var width = probe.naturalWidth;
+            var height = probe.naturalHeight;
+            probe.onload = null;
+            probe.onerror = null;
+            probe.src = "";
             var name = nameFor(url);
             var tile = document.createElement("div");
             tile.className = "isf-grid-item";
-            tile.appendChild(probe);
+            var preview = document.createElement("img");
+            preview.alt = "";
+            preview.decoding = "async";
+            tile.appendChild(preview);
+            observePreview(resultsContainer, preview, url);
             var overlay = document.createElement("div");
             overlay.className = "isf-overlay";
-            overlay.textContent = probe.naturalWidth + "x" + probe.naturalHeight;
+            overlay.textContent = width + "x" + height;
             tile.appendChild(overlay);
             tile.onclick = function() {
               downloadFile(url, name);
@@ -803,7 +871,7 @@ defaultPos: { right: 20, bottom: 20 }
               downloadFile(url, name, true);
             }));
             state.foundUrls.add({ url, name });
-            var area = probe.naturalWidth * probe.naturalHeight;
+            var area = width * height;
             var index = loadedTiles.length;
             while (index > 0 && loadedTiles[index - 1].area < area) index--;
             if (index < loadedTiles.length) {
@@ -925,7 +993,7 @@ defaultPos: { right: 20, bottom: 20 }
     var s = value.trim().toLowerCase();
     if (!s || "transparent" === s || "rgba(0, 0, 0, 0)" === s) return null;
     if (colorCache.has(s)) return colorCache.get(s);
-    var key = null;
+    var key;
     if (s.charAt(0) === "#") {
       var hex = s.slice(1);
       if (hex.length === 3 || hex.length === 4) {

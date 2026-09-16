@@ -47,7 +47,7 @@ function normalizeColor(value) {
 
     if (colorCache.has(s)) return colorCache.get(s);
 
-    var key = null;
+    var key;
     if (s.charAt(0) === "#") {
         var hex = s.slice(1);
         if (hex.length === 3 || hex.length === 4) {

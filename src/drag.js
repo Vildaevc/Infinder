@@ -1,49 +1,77 @@
-// Функционал перетаскивания для элементов виджета Infinder
+// Перетаскивание элементов виджета Infinder.
+// Pointer Events: работает и мышью, и пальцем (тач-экраны), и стилусом.
+export function makeDraggable(el, handle) {
+    var dragging = false;
+    var pointerId = null;
+    var startX = 0, startY = 0, originLeft = 0, originTop = 0;
 
-// Функция d(e, t) — drag
-export function makeDraggable(e, t) {
-    let i = false, r, o, n, s;
+    function onPointerMove(evt) {
+        if (pointerId !== null && evt.pointerId !== pointerId) return;
+        var dx = evt.clientX - startX;
+        var dy = evt.clientY - startY;
 
-    function a(t) {
-        let a = t.clientX - r, l = t.clientY - o;
-        if (!i && (Math.abs(a) > 3 || Math.abs(l) > 3) && (i = true, e.style.cursor = "grabbing"), i) {
-            t.preventDefault();
-            let d = n + a, f = s + l, c = window.innerWidth - e.offsetWidth, p = window.innerHeight - e.offsetHeight;
-            d = Math.max(0, Math.min(d, c)), f = Math.max(0, Math.min(f, p));
-            e.style.left = d + "px";
-            e.style.top = f + "px";
+        // Считаем перетаскиванием только движение больше 3px (иначе это клик)
+        if (!dragging && (Math.abs(dx) > 3 || Math.abs(dy) > 3)) {
+            dragging = true;
+            el.style.cursor = "grabbing";
         }
+        if (!dragging) return;
+
+        evt.preventDefault();
+        var maxLeft = window.innerWidth - el.offsetWidth;
+        var maxTop = window.innerHeight - el.offsetHeight;
+        var left = Math.max(0, Math.min(originLeft + dx, maxLeft));
+        var top = Math.max(0, Math.min(originTop + dy, maxTop));
+        el.style.left = left + "px";
+        el.style.top = top + "px";
     }
 
-    function l(t) {
-        document.removeEventListener("mousemove", a);
-        document.removeEventListener("mouseup", l);
-        e.style.cursor = "";
-        if (i) {
-            if ("isf-main-button" === e.id) {
+    function onPointerUp(evt) {
+        if (pointerId !== null && evt.pointerId !== pointerId) return;
+        document.removeEventListener("pointermove", onPointerMove);
+        document.removeEventListener("pointerup", onPointerUp);
+        document.removeEventListener("pointercancel", onPointerUp);
+        el.style.cursor = "";
+
+        if (pointerId !== null && el.releasePointerCapture) {
+            try { el.releasePointerCapture(pointerId); } catch (ignore) { /* уже отпущен */ }
+        }
+        pointerId = null;
+
+        if (dragging) {
+            if ("isf-main-button" === el.id) {
                 try {
-                    localStorage.setItem("isf_pos_v3", JSON.stringify({ left: parseInt(e.style.left), top: parseInt(e.style.top) }));
+                    localStorage.setItem("isf_pos_v3", JSON.stringify({ left: parseInt(el.style.left), top: parseInt(el.style.top) }));
                 } catch (err) { /* localStorage недоступен — позиция не сохранится, это не критично */ }
             }
-            setTimeout(function () { i = false; }, 50);
+            // Гасим «клик», который браузер пришлёт сразу после перетаскивания
+            setTimeout(function () { dragging = false; }, 50);
         }
     }
 
-    (t || e).addEventListener("mousedown", function (t) {
-        if (0 !== t.button) return;
-        i = false;
-        r = t.clientX;
-        o = t.clientY;
-        var d = e.getBoundingClientRect();
-        n = d.left;
-        s = d.top;
-        e.style.right = "auto";
-        e.style.bottom = "auto";
-        e.style.left = n + "px";
-        e.style.top = s + "px";
-        document.addEventListener("mousemove", a);
-        document.addEventListener("mouseup", l);
+    (handle || el).addEventListener("pointerdown", function (evt) {
+        if (0 !== evt.button) return; // только основная кнопка мыши / касание
+        dragging = false;
+        pointerId = evt.pointerId;
+        startX = evt.clientX;
+        startY = evt.clientY;
+
+        var rect = el.getBoundingClientRect();
+        originLeft = rect.left;
+        originTop = rect.top;
+        el.style.right = "auto";
+        el.style.bottom = "auto";
+        el.style.left = originLeft + "px";
+        el.style.top = originTop + "px";
+
+        // Захват указателя: движение отслеживается даже за пределами элемента
+        if (el.setPointerCapture) {
+            try { el.setPointerCapture(evt.pointerId); } catch (ignore) { /* не критично */ }
+        }
+        document.addEventListener("pointermove", onPointerMove);
+        document.addEventListener("pointerup", onPointerUp);
+        document.addEventListener("pointercancel", onPointerUp);
     });
 
-    e.isJustDragged = function () { return i; };
+    el.isJustDragged = function () { return dragging; };
 }

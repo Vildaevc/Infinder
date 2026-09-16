@@ -19,6 +19,9 @@ jobs:
       - name: Установка зависимостей
         run: npm ci
 
+      - name: Линтер (ESLint + контракты проекта)
+        run: npm run lint
+
       - name: Сборка и проверка метаданных userscript
         run: npm run check
 

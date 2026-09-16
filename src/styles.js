@@ -69,6 +69,8 @@ const styles = `
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.15);
         transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
         user-select: none;
+        -webkit-user-select: none;
+        touch-action: none !important;
     }
     #isf-root #isf-main-button:hover {
         box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.25);
@@ -129,6 +131,8 @@ const styles = `
         align-items: center !important;
         cursor: grab;
         user-select: none;
+        -webkit-user-select: none;
+        touch-action: none !important;
         min-height: 48px !important;
     }
     #isf-root .isf-header:active { cursor: grabbing; }
